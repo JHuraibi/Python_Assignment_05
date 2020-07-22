@@ -1,0 +1,7 @@
+*.pdf
+*.txt
+*.docx
+.idea
+A02_Q01.py
+breezypythongui.py
+__pycache__
