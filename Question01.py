@@ -26,6 +26,8 @@ class PopulationSpace:
         self.population = []
         self.elites = []
         self.pop_size = 0
+        self.range_lower_bound = -10
+        self.range_upper_bound = 110
         pass
 
     def _generate(self):
@@ -55,20 +57,24 @@ class PopulationSpace:
         """Piecewise 2 of 2
         x = -exp(-(x / 100)^2))
         """
-        
+        inner = float(value / 100)
+        inner = -(math.pow(inner, 2))
+        return -(math.exp(inner))
 
     def _rank(self):
-        """Sorts the Population by their fitness score.
+        """Sorts the Population by their fitness score (DESCENDING!)
         Fitness: piecewise function as defined by assignment instructions.
+        Sorting is reversed so that indexes can also intuitively associate a Solution's fitness.
+        e.g. index 0 is always the "Super Elite" and 0 to [(size * 0.2)] are the Elites.
         """
-        self.population.sort()
+        self.population.sort(reverse=True)
 
     def _filter(self):
         """Selects the top 20% of scores (i.e. the elites)."""
         # CHECK: will error occur when population is <2
         low_bound = len(self.population) * 0.2
         low_bound = math.ceil(low_bound)
-        self.elites = self.population[low_bound:-1]
+        self.elites = self.population[0:low_bound]
 
     def accept(self):
         """Determines the individuals of the Population that will influence
@@ -80,6 +86,16 @@ class PopulationSpace:
         """Selects the next generation's individuals using knowledge (influence)
          from the Belief Space."""
         pass
+
+    def _normative_knowledge(self, value):
+        """Checks if the value is a new min or max"""
+        pass
+
+    def _update_range(self):
+        """Updates the current range of the solution values"""
+        # TODO: Remove either min/max or the bound variables (redundant)
+        self.range_lower_bound = self.min
+        self.range_upper_bound = self.max
 
 
 class BeliefSpace:
