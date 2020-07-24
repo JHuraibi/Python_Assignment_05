@@ -24,7 +24,7 @@ class PopulationSpace:
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
-        for i in range(0, 50):
+        for i in range(50):
             self.current_gen.append(random.randint(-10, 100))
 
     def generate(self, next_gen):
@@ -113,7 +113,7 @@ class BeliefSpace:
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         # TODO: Check precision of value of tending toward super elite
-        next_gen = []                                                           # Redundant, but helps intuitive reading
+        next_gen = current_gen                                                  # Redundant, but helps intuitive reading
         local_min = self.minima
         local_max = self.maxima
 
@@ -126,8 +126,6 @@ class BeliefSpace:
                 next_gen[i] = solution - 1                                      # Tend downward to top score thus far
             elif solution < self.super_elite:
                 next_gen[i] = solution + 1                                      # Tend upward to top score thus far
-            else:
-                next_gen[i] = current_gen[i]                                    # Already equivalent to super elite
 
         return next_gen                                                         # Return the new (influenced) generation
 
