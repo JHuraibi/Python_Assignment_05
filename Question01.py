@@ -175,7 +175,7 @@ if __name__ == '__main__':
         belief.update(population.accept())
         influenced = belief.influence(population.current_gen)
         population.generate(influenced)
-        time = time - 1
+        time = time + 1
 
         print(population)
 
