@@ -5,7 +5,9 @@
 import math
 import random
 
+
 # CRITICAL: Global precision value
+
 
 class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
@@ -37,9 +39,10 @@ class PopulationSpace:
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
         # TODO: floating point values
-        for i in range(0, len(self.current_gen)):                               # Check value of each solution
-            solution = self.current_gen[i]
-            if solution > 100:
+        for i in range(len(self.current_gen)):                                  # Check value of each solution
+            test =
+            solution = float(self.current_gen[i])
+            if solution > (100.0 + 1e-18):                                      # 100.000 000 000 000 000 000 0
                 self.current_gen[i] = self._larger_than_100(solution)           # x > 100
             else:
                 self.current_gen[i] = self._less_than_100(solution)             # x <= 100
@@ -65,7 +68,6 @@ class PopulationSpace:
         return -(math.exp(inner))
 
     def _rank(self):
-        # CRITICAL: Are elites and super elite correctly being determined?System.out.println();
         """Sorts the Population by their fitness score (DESCENDING!)
         Fitness: piecewise function as defined by assignment instructions.
         Sorting is reversed so that indexes can also intuitively associate a Solution's fitness.
