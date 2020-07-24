@@ -114,8 +114,8 @@ class BeliefSpace:
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         # TODO: Check precision of value of tending toward super elite
         next_gen = current_gen                                                  # Redundant, but helps intuitive reading
-        local_min = self.minima
-        local_max = self.maxima
+        local_min = math.floor(self.minima)
+        local_max = math.ceil(self.maxima)
 
         for i in range(0, len(current_gen)):
             solution = current_gen[i]
