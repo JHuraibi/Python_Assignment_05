@@ -5,6 +5,7 @@
 import math
 import random
 
+# CRITICAL: Global precision value
 
 class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
@@ -112,25 +113,53 @@ class BeliefSpace:
 
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
-        # TODO: Check precision of value of tending toward super elite
         pop_size = len(current_gen)                                             # Number of individuals in population
 
         next_gen = [None] * pop_size                                            # Redundant, but helps intuitive reading
-        local_min = math.floor(self.minima)                                     # Lower bound of current value range
-        local_max = math.ceil(self.maxima)                                      # Upper bound of current value range
+        local_min = self.minima                                                 # Lower bound of current value range
+        local_max = self.maxima                                                 # Upper bound of current value range
 
         for i in range(0, pop_size):
-            solution = current_gen[i]
-            mutation_occurs = random.randint(0, 1)
+            solution = current_gen[i]                                           # Intermediate var.
+            target = self.super_elite
+            mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
 
             if mutation_occurs:
-                next_gen[i] = random.randint(local_min, local_max)              # Apply a randomized mutation value
-            elif solution > self.super_elite:
+                next_gen[i] = self._mutation_value(local_min, local_max)        # Apply a randomized mutation value
+                print("[DEBUG]: Mutation")
+            elif self._greater_than(solution, target):
                 next_gen[i] = solution - 1                                      # Tend downward to top score thus far
-            elif solution < self.super_elite:
+            elif self._less_than(solution, target):
                 next_gen[i] = solution + 1                                      # Tend upward to top score thus far
+            else:
+                next_gen[i] = current_gen[i]                                    # Already equivalent to super-elite
 
         return next_gen                                                         # Return the new (influenced) generation
+
+    @staticmethod
+    def _mutation_value(minimum, maximum):
+        """Returns a random value between minimum and maximum while accounting for decimal precision."""
+        minimum = minimum * 1e20
+        maximum = maximum * 1e20
+        return random.randint(minimum, maximum) / 1e20
+
+    @staticmethod
+    def _greater_than(value, base_value):
+        """Returns whether "value" is GREATER than "base_value".
+        Built-in Python Rounding.
+        Floating-point precision of 20."""
+        value = round(value, 20)
+        base_value = round(base_value, 20)
+        return (value - base_value) > 1e-21
+
+    @staticmethod
+    def _less_than(value, base_value):
+        """Returns whether "value" is LESSER than "base_value".
+        Built-in Python Rounding.
+        Floating-point precision of 20."""
+        value = round(value, 20)
+        base_value = round(base_value, 20)
+        return (value - base_value) < -1e-21
 
 
 if __name__ == '__main__':
