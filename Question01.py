@@ -15,21 +15,25 @@ class PopulationSpace:
         self.pop_size = 0
         self.range_lower_bound = -10
         self.range_upper_bound = 110
+        self._generate()
         pass
 
     def _generate(self):
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
-        pass
+        for i in range(0, 100):
+            self.current_gen[i] = random.randint(-10, 100)
 
     def evaluate(self):
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
-        for solution in self.current_gen:
+        for i in range(0, len(self.current_gen)):
+            solution = self.current_gen[i]
             if solution > 100:
-                solution = self._larger_than_100(solution)
+                self.current_gen[i] = self._larger_than_100(solution)
             else:
-                solution = self._less_than_100(solution)
+                self.current_gen[i] = self._less_than_100(solution)
+        self._rank()
 
     @staticmethod
     def _larger_than_100(value):
@@ -49,7 +53,7 @@ class PopulationSpace:
         return -(math.exp(inner))
 
     def _rank(self):
-        # CRITICAL: Elites and super elite are not correctly being determined
+        # CRITICAL: Are elites and super elite correctly being determined?
         """Sorts the Population by their fitness score (DESCENDING!)
         Fitness: piecewise function as defined by assignment instructions.
         Sorting is reversed so that indexes can also intuitively associate a Solution's fitness.
@@ -105,14 +109,14 @@ class BeliefSpace:
         local_max = self.maxima
 
         for i in range(0, len(current_gen)):
-            individual = current_gen[i]
+            solution = current_gen[i]
             mutation_occurs = random.randint(0, 1)
             if mutation_occurs:
                 next_gen[i] = random.randint(local_min, local_max)
-            elif individual > self.super_elite:
-                next_gen[i] = individual - 1
-            elif individual < self.super_elite:
-                next_gen[i] = individual + 1
+            elif solution > self.super_elite:
+                next_gen[i] = solution - 1
+            elif solution < self.super_elite:
+                next_gen[i] = solution + 1
             else:
                 next_gen[i] = current_gen[i]
 
@@ -120,36 +124,55 @@ class BeliefSpace:
 
 
 if __name__ == '__main__':
-    time = 0
+    time = 0                                        # [1]
     endTime = 100
 
-    population = PopulationSpace()
+    population = PopulationSpace()                  # [2]
     belief = BeliefSpace()
 
     while time < endTime:
         print("[Time: {}]\n".format(time))
-        population.evaluate()
-        belief.update(population.current_gen)
-        time = time - 1
+        population.evaluate()                       # [3]
+        population.accept()                         # [4a]
+        belief.update(population.current_gen)       # [4b]
+        # population._generate()
+        time = time - 1                             # [6]
 
-    print("\ndone\n")
+    print("\nfin\n")
 
 
 # --| PseudoCode for Each Generation |--
 #   Begin
-#       t = 0
-#       initialize Bt, Pt
+#       t = 0                                       #
+#       initialize Bt, Pt                           #
 #       repeat
-#           evaluate Pt
+#           evaluate Pt                             #
 #           update(Bt, accept(Pt))                  # ?staticmethod
 #           generate(Pt, influence(Bt))             # ?staticmethod
 #           t = t + 1;                              # update time
 #           select Pt from Pt - 1                   # ?remove 1 solution
 #           until(termination condition achieved)   # check loop condition
 #   End
+#
+#
+# --| Overview of Major Methods |--
+# evaluate()/obj()
+#   - Evaluate each solution and find their fitness score
+#   - Rank solutions based on their fitness score f(x)
+#
+# accept()
+#   - Select 20% of the top-performing individuals(Elites)
+#
+# update()
+#   - Update the Belief Space using top-performing individuals
+#       - record the top-performing individuals (situational knowledge)
+#       - record max, min, and range of variable x (normative knowlege)
+#
+# influence()
+#   - Use the domain knowledge in the Belief Space to influence/evolve the population
+#       - compare each solution to the super elite(the best solution)and take one step toward that.
+#       - With a probability of 50% introduce a mutation to a solution by changing
+#           the value randomly within the recorded min and max.
 
-# def evaluate_router(self):
-#     """Mimics a piecewise by routing to static method based on value passed-in.
-#     Evaluates the performance of the Population's individuals.
-#     Performance is a piecewise function as defined by assignment instructions."""
-#     pass
+
+
