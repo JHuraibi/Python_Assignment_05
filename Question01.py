@@ -25,7 +25,7 @@ class PopulationSpace:
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
         for i in range(0, 50):
-            self.current_gen[i] = random.randint(-10, 100)
+            self.current_gen.append(random.randint(-10, 100))
 
     def generate(self, next_gen):
         """Generates the initial 50 random solutions (i.e. the population).
