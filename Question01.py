@@ -10,7 +10,7 @@ class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
 
     def __init__(self):
-        self.current_gen = []
+        self.current_gen = [None] * 50
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
@@ -25,7 +25,7 @@ class PopulationSpace:
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
         for i in range(50):
-            self.current_gen.append(random.randint(-10, 100))
+            self.current_gen[i] = random.randint(-10, 100)
 
     def generate(self, next_gen):
         """Generates the initial 50 random solutions (i.e. the population).
@@ -113,13 +113,16 @@ class BeliefSpace:
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         # TODO: Check precision of value of tending toward super elite
-        next_gen = current_gen                                                  # Redundant, but helps intuitive reading
-        local_min = math.floor(self.minima)
-        local_max = math.ceil(self.maxima)
+        pop_size = len(current_gen)                                             # Number of individuals in population
 
-        for i in range(0, len(current_gen)):
+        next_gen = [None] * pop_size                                            # Redundant, but helps intuitive reading
+        local_min = math.floor(self.minima)                                     # Lower bound of current value range
+        local_max = math.ceil(self.maxima)                                      # Upper bound of current value range
+
+        for i in range(0, pop_size):
             solution = current_gen[i]
             mutation_occurs = random.randint(0, 1)
+
             if mutation_occurs:
                 next_gen[i] = random.randint(local_min, local_max)              # Apply a randomized mutation value
             elif solution > self.super_elite:
