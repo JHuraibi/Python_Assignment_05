@@ -14,7 +14,13 @@ class PopulationSpace:
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
-    
+
+    def __str__(self):
+        pop_size = len(self.current_gen)
+        for i in range(0, pop_size):
+            print("{} ".format(self.current_gen[i]))
+        print('\n')
+
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
@@ -141,7 +147,7 @@ if __name__ == '__main__':
         population.generate(influenced)
         time = time - 1
 
-        population.print()
+        print(population)
 
     print("\nfin\n")
 
