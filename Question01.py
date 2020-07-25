@@ -22,7 +22,7 @@ class PopulationSpace:
         pop_size = len(self.current_gen)
         for i in range(0, pop_size):
             print("{} ".format(self.current_gen[i]))
-        print('\n')
+        print("\n")
 
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
@@ -40,7 +40,6 @@ class PopulationSpace:
         Method defined as "obj()" in academic paper."""
         # TODO: floating point values
         for i in range(len(self.current_gen)):                                  # Check value of each solution
-            test =
             solution = float(self.current_gen[i])
             if solution > (100.0 + 1e-18):                                      # 100.000 000 000 000 000 000 0
                 self.current_gen[i] = self._larger_than_100(solution)           # x > 100
@@ -68,12 +67,12 @@ class PopulationSpace:
         return -(math.exp(inner))
 
     def _rank(self):
-        """Sorts the Population by their fitness score (DESCENDING!)
+        """Sorts the Population by their fitness score
         Fitness: piecewise function as defined by assignment instructions.
-        Sorting is reversed so that indexes can also intuitively associate a Solution's fitness.
-        e.g. index 0 is always the "Super Elite" and 0 to [(size * 0.2)] are the Elites.
+        Indexes can also intuitively associate a Solution's fitness.
+        e.g. index 0 is always the "Super Elite" and [0 to (size * 0.2)] are the "Elites".
         """
-        self.current_gen.sort(reverse=True)
+        self.current_gen.sort()
 
     def accept(self):
         """Determines the individuals of the Population that will influence
@@ -107,7 +106,6 @@ class BeliefSpace:
         1. Recording the current generation's top performers (elites).
         2. Recording the current generation's minimum and maximum values.
         "elites" is presorted (descending) by the Population class before being passed-in here."""
-        # CHECK: will error occur when population is <2 ?
         self.elites = elites                                                    # Record the top-performers (plural)
         self.super_elite = elites[0]                                            # Record single, top performer (single)
         self.minima = elites[-1]                                                # Lowest value of the elites
@@ -131,10 +129,13 @@ class BeliefSpace:
                 print("[DEBUG]: Mutation")
             elif self._greater_than(solution, target):
                 next_gen[i] = solution - 1                                      # Tend downward to top score thus far
+                print("[DEBUG]: MORE")
             elif self._less_than(solution, target):
                 next_gen[i] = solution + 1                                      # Tend upward to top score thus far
+                print("[DEBUG]: LESS")
             else:
                 next_gen[i] = current_gen[i]                                    # Already equivalent to super-elite
+                print("[DEBUG]: NONE")
 
         return next_gen                                                         # Return the new (influenced) generation
 
