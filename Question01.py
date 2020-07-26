@@ -1,9 +1,10 @@
-# Author: Jamal Huraibi
+# Author: Jamal Huraibi, fh1328
 # Assignment: 5
 # Question: 1
 
 # TODO: Normative knowledge
 # TODO: Global precision value
+# TODO: Comments
 # If time: Global SIZE for population size
 # If time: Fix purpose of docstrings
 # SIZE = 50
@@ -87,7 +88,7 @@ class PopulationSpace:
         Note: Indexes can also intuitively associate a Solution's fitness.
         e.g. index 0 is always the "Super Elite" and [0 to (size * 0.2)] are the "Elites".
         """
-        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by Solutions' y-value
+        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by Solutions' y-values
 
     def accept(self):
         """Determines the individuals of the Population that will influence the Belief Space (i.e. the Elites).
@@ -139,7 +140,7 @@ class BeliefSpace:
         x_local_max = self.maxima_x                                             # Upper bound of current value range
 
         for solution in current_gen:
-            target = self.super_elite                                           # Best solution this generation
+            target = self.super_elite.y                                         # Best solution this generation
             mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
             solution_value = solution.y
 
@@ -147,28 +148,59 @@ class BeliefSpace:
                 mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_gen.append(solution)                                       # Add mutated individual to next gen.
-                print("[DEBUG]: Mutation")
+                # print("[DEBUG]: Mutation")
             elif solution_value > target:
                 solution.y = solution.y - 1                                     # Tend DOWNWARD to best score thus far
                 next_gen.append(solution)                                       # Add updated individual to next gen.
-                print("[DEBUG]: MORE")
+                # print("[DEBUG]: MORE")
             elif solution_value < target:
                 solution.y = solution.y - 1                                     # Tend UPWARD to best score thus far
                 next_gen.append(solution)                                       # Add updated individual to next gen.
-                print("[DEBUG]: LESS")
+                # print("[DEBUG]: LESS")
             else:
                 next_gen.append(solution)                                       # Individual is already at best value
-                print("[DEBUG]: NONE")
+                # print("[DEBUG]: NONE")
 
         return next_gen                                                         # Return the new (influenced) generation
 
     @staticmethod
     def _mutation_value(minimum, maximum):
-        """Returns a random value between minimum and maximum with precision of 10."""
-        minimum = int(minimum * 1e10)                                           # Convert decimal to int
-        maximum = int(maximum * 1e10)                                           # Convert decimal to int
+        """Returns a random value between minimum and maximum.
+        Will handle decimals with a precision of 10.
+        """
+        # TODO: Precision when min or max is decimal and other is not
+        min_mod = 1.0
+        max_mod = 1.0
+        if 0.0 > minimum > -1.0:
+            min_mod = 1e10
+        if 0.0 > maximum > -1.0:
+            max_mod = 1e10
+
+        minimum = int(minimum * min_mod)                                        # Truncate decimals beyond 10 (if exist)
+        maximum = int(maximum * max_mod)                                        # Truncate decimals beyond 10 (if exist)
         random_x_value = random.randint(minimum, maximum)                       # Get a random value between max and min
         return random_x_value / 1e10                                            # Convert back to decimal
+
+    @staticmethod
+    def test_mutation_value(minimum, maximum):
+        # CRITICAL: Test below
+        precision_mod = 1.0
+        sign_mod = 1.0
+        value_range = maximum - minimum
+
+        if 0.0 < value_range < 1.0:
+            precision_mod = 1e10
+        elif -1.0 < value_range < 0.0:
+            precision_mod = 1e10
+            sign_mod = -1.0
+
+        value_range = value_range * precision_mod
+
+        random_offset = random.randint(0, value_range)
+
+        print("[DEBUG] Random: %d" % minimum + random_offset * sign_mod)
+
+        return minimum + random_offset * sign_mod
 
     @staticmethod
     def _greater_than(value, base_value):
