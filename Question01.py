@@ -175,26 +175,6 @@ class BeliefSpace:
 
         return minimum + random_offset                                          # Return the random number in the range
 
-    @staticmethod
-    def test_mutation_value(minimum, maximum):
-        # CRITICAL: Test below
-        precision_mod = 1.0
-        sign_mod = 1.0
-        value_range = maximum - minimum
-
-        if 0.0 < value_range < 1.0:
-            precision_mod = 1e10
-        elif -1.0 < value_range < 0.0:
-            precision_mod = 1e10
-            sign_mod = -1.0
-
-        value_range = value_range * precision_mod
-
-        random_offset = random.randint(0, value_range)
-
-        print("[DEBUG] Random: %d" % minimum + random_offset * sign_mod)
-
-        return minimum + random_offset * sign_mod
 
     @staticmethod
     def _greater_than(value, base_value):
