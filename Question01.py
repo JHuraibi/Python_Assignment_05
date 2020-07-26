@@ -2,18 +2,53 @@
 # Assignment: 5
 # Question: 1
 
+# CRITICAL: Global precision value
+# If time: Global SIZE for population size
+# SIZE = 50
+
+
 import math
 import random
 
 
-# CRITICAL: Global precision value
+class Solution:
+    def __init__(self, x):
+        self.x = x                                                              # Set x value
+        self.y = None                                                           # Declare y variable
+        self.evaluate()                                                         # Calculate and set y-value
+
+    def evaluate(self):
+        """Evaluates the performance of the Population's individuals.
+        Method defined as "obj()" in academic paper."""
+        # TODO: floating point values
+        if self.x > (100.0 + 1e-18):                                            # 100.000 000 000 000 000 000 0
+            self.y = self._larger_than_100(self.x)                              # x > 100
+        else:
+            self.y = self._less_than_100(self.x)                                # x <= 100
+
+    @staticmethod
+    def _larger_than_100(value):
+        """Piecewise 1 of 2
+        x = -exp(-1) + (x - 100)(x - 102)
+        """
+        # TODO: floating point values
+        product = (value - 100) * (value - 102)  # (x - 100)(x - 102)
+        return -(math.exp(-1)) + product  # -exp(-1) + (x - 100)(x - 102)
+
+    @staticmethod
+    def _less_than_100(value):
+        """Piecewise 2 of 2
+        x = -exp(-(x / 100)^2))
+        """
+        inner = float(value / 100.0)  # (x / 100)
+        inner = -(math.pow(inner, 2))  # -(x / 100)^2)
+        return -(math.exp(inner))
 
 
 class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
-
     def __init__(self):
-        self.current_gen = [[None] * 50, [None] * 50]
+        self.current_gen = []
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
@@ -36,16 +71,10 @@ class PopulationSpace:
         self.current_gen = next_gen
 
     def evaluate(self):
-        """Evaluates the performance of the Population's individuals.
-        Method defined as "obj()" in academic paper."""
+        """Indirectly evaluates the (via Solution.evaluate())"""
         # TODO: floating point values
-        pop_size = len(self.current_gen)
-        for i in range(pop_size):                                               # Check value of each solution
-            solution = float(self.current_gen[i])
-            if solution > (100.0 + 1e-18):                                      # 100.000 000 000 000 000 000 0
-                self.current_gen[i][1] = _larger_than_100(solution)                # x > 100
-            else:
-                self.current_gen[i] = _less_than_100(solution)                  # x <= 100
+        for solution in self.current_gen:                                       # Check value of each solution
+            solution.evaluate()
 
         self._rank()                                                            # Sort the new values
 
@@ -148,23 +177,6 @@ class BeliefSpace:
         value = round(value, 20)
         base_value = round(base_value, 20)
         return (value - base_value) < -1e-21
-
-
-def _larger_than_100(value):
-    """Piecewise 1 of 2
-    x = -exp(-1) + (x - 100)(x - 102)
-    """
-    # TODO: floating point values
-    product = (value - 100) * (value - 102)                                     # (x - 100)(x - 102)
-    return -(math.exp(-1)) + product                                            # -exp(-1) + (x - 100)(x - 102)
-
-def _less_than_100(value):
-    """Piecewise 2 of 2
-    x = -exp(-(x / 100)^2))
-    """
-    inner = float(value / 100.0)                                                # (x / 100)
-    inner = -(math.pow(inner, 2))                                               # -(x / 100)^2)
-    return -(math.exp(inner))
 
 
 if __name__ == '__main__':
