@@ -6,47 +6,6 @@ import math
 import random
 
 
-class Solution:
-    """The Individuals of each Generation."""
-    def __init__(self, x):
-        self.x = x                                                              # Set x value
-        self.y = None                                                           # Declare y variable
-        self.evaluate_solution()                                                # Calculate and set y-value
-
-    def __str__(self):
-        x = format(self.x, '.21f')
-        y = format(self.y, '.21f')
-        return "x = %-.21s, y = %-.21s" % (x, y)
-
-    def evaluate_solution(self):
-        """Evaluates the performance of the Population's individuals.
-        Method defined as "obj()" in academic paper."""
-        # CHECK: floating point values
-        if self.x > (100.0 + 1e-18):
-            self.y = self._larger_than_100(self.x)                              # x > 100
-        else:
-            self.y = self._less_than_100(self.x)                                # x <= 100
-
-    @staticmethod
-    def _larger_than_100(value):
-        """Returns value for Fitness Piecewise 1 of 2:
-         f(x) = -exp(-1) + (x - 100)(x - 102)
-         """
-        product = (value - 100) * (value - 102)                                 # (x - 100)(x - 102)
-
-        return -(math.exp(-1)) + product                                        # -exp(-1) + (x - 100)(x - 102)
-
-    @staticmethod
-    def _less_than_100(value):
-        """Returns value for Fitness Piecewise 2 of 2:
-        f(x) = -exp(-(x / 100)^2))
-        """
-        inner = float(value / 100.0)                                            # (x / 100)
-        exponent = -(math.pow(inner, 2))                                        # -(x / 100)^2)
-
-        return -(math.exp(exponent))                                            # -exp(-(x / 100)^2))
-
-
 class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
     def __init__(self):
@@ -189,6 +148,47 @@ class BeliefSpace:
     def _update_step_amount(self):
         """Fine-tunes the value that Solution x-values will be adjusted by next generation."""
         self.step = self.step / 2.0                                             # Halve the step amount
+
+
+class Solution:
+    """The Individuals of each Generation."""
+    def __init__(self, x):
+        self.x = x                                                              # Set x value
+        self.y = None                                                           # Declare y variable
+        self.evaluate_solution()                                                # Calculate and set y-value
+
+    def __str__(self):
+        x = format(self.x, '.21f')                                              # x-value with decimal precision of 21
+        y = format(self.y, '.21f')                                              # y-value with decimal precision of 21
+        return "x = %-.21s, y = %-.21s" % (x, y)                                # Print values left-justified
+
+    def evaluate_solution(self):
+        """Evaluates the performance of the Population's individuals.
+        Method defined as "obj()" in academic paper."""
+        # CHECK: floating point values
+        if self.x > (100.0 + 1e-18):
+            self.y = self._larger_than_100(self.x)                              # x > 100
+        else:
+            self.y = self._less_than_100(self.x)                                # x <= 100
+
+    @staticmethod
+    def _larger_than_100(value):
+        """Returns value for Fitness Piecewise 1 of 2:
+         f(x) = -exp(-1) + (x - 100)(x - 102)
+         """
+        product = (value - 100) * (value - 102)                                 # (x - 100)(x - 102)
+
+        return -(math.exp(-1)) + product                                        # -exp(-1) + (x - 100)(x - 102)
+
+    @staticmethod
+    def _less_than_100(value):
+        """Returns value for Fitness Piecewise 2 of 2:
+        f(x) = -exp(-(x / 100)^2))
+        """
+        inner = float(value / 100.0)                                            # (x / 100)
+        exponent = -(math.pow(inner, 2))                                        # -(x / 100)^2)
+
+        return -(math.exp(exponent))                                            # -exp(-(x / 100)^2))
 
 
 if __name__ == '__main__':
