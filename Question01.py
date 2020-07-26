@@ -148,17 +148,22 @@ class BeliefSpace:
                 mutation = self._mutation_value()                               # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_generation.append(solution)                                # Add mutated individual to next gen.
+                print("[DEBUG - Mutation]")
             elif self._out_of_good_range(solution.x):
                 solution.x = self._good_range_value(solution.x)                 # Put x-value into the "good range"
                 next_generation.append(solution)                                # Add updated individual to next gen.
+                print("[DEBUG - Out of good range]")
             elif solution_value > target:
                 solution.y = solution.y - step                                  # Tend DOWNWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
+                print("[DEBUG - Above target]")
             elif solution_value < target:
                 solution.y = solution.y + step                                  # Tend UPWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
+                print("[DEBUG - Below target]")
             else:
                 next_generation.append(solution)                                # Individual is already at best value
+                print("[DEBUG - Good]")
 
         self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
