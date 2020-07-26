@@ -78,15 +78,13 @@ class PopulationSpace:
 
         self._rank()                                                            # Sort the new values
 
-
-
     def _rank(self):
-        """Sorts the Population by their fitness score
+        """Sorts the Population by their fitness score (i.e. their y-value)
         Fitness: piecewise function as defined by assignment instructions.
         Indexes can also intuitively associate a Solution's fitness.
         e.g. index 0 is always the "Super Elite" and [0 to (size * 0.2)] are the "Elites".
         """
-        self.current_gen.sort()
+        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)
 
     def accept(self):
         """Determines the individuals of the Population that will influence
