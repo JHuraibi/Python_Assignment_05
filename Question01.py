@@ -99,20 +99,16 @@ class PopulationSpace:
         return self.current_gen[0:low_bound]
         # self.super_elite = self.current_gen[0]
 
-    def _normative_knowledge(self, value):
-        """Updates the current "good range" of values."""
-        pass
-
 
 class BeliefSpace:
     """Information of ancestors (i.e knowledge), accessed by current/future generations."""
     def __init__(self):
         self.minima_y = None
         self.maxima_y = None
-        self.minima_x = None
-        self.maxima_x = None
         self.elites = []
         self.super_elite = None
+        self.low_bound_x = None
+        self.upper_bound_x = None
         self.step = 1.0                                                         # Amount to tend toward super elite
 
     def update(self, elites):
@@ -122,17 +118,21 @@ class BeliefSpace:
         "elites" is pre-sorted before being passed-in here."""
         self.elites = elites                                                    # Record the top-performers
         self.super_elite = elites[0]                                            # Record single, top performer
-        self.minima_x = elites[-1].x                                            # X-value of lowest value
-        self.minima_y = elites[-1].y                                            # Y-value of lowest value
-        self.maxima_x = elites[0].x                                             # X-value of highest value
-        self.maxima_y = elites[0].y                                             # Y-value of highest value
+        self.minima_y = elites[-1].y                                            # Lowest solution value of elites
+        self.maxima_y = elites[0].y                                             # Highest solution value of elites
+        self._update_normative_knowledge(elites)                                # Update x-value range of elites
+
+    def _update_normative_knowledge(self, new_elites):
+        """Updates the x-values of the "good range" of solutions."""
+        new_elites
+
 
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         # CHECK: Normative knowledge
         next_generation = []  # Redundant, but helps intuitive reading
-        x_local_min = self.minima_x  # X of lower bound of current range
-        x_local_max = self.maxima_x  # X of upper bound of current range
+        x_local_min = self.low_bound_x  # X of lower bound of current range
+        x_local_max = self.upper_bound_x  # X of upper bound of current range
         step = self.step
 
         for solution in current_gen:
