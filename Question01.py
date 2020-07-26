@@ -13,7 +13,7 @@ class PopulationSpace:
     """Evolutionary Search. Candidate Solutions."""
 
     def __init__(self):
-        self.current_gen = [None] * 50
+        self.current_gen = [[None] * 50, [None] * 50]
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
@@ -39,32 +39,17 @@ class PopulationSpace:
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
         # TODO: floating point values
-        for i in range(len(self.current_gen)):                                  # Check value of each solution
+        pop_size = len(self.current_gen)
+        for i in range(pop_size):                                               # Check value of each solution
             solution = float(self.current_gen[i])
             if solution > (100.0 + 1e-18):                                      # 100.000 000 000 000 000 000 0
-                self.current_gen[i] = self._larger_than_100(solution)           # x > 100
+                self.current_gen[i][1] = _larger_than_100(solution)                # x > 100
             else:
-                self.current_gen[i] = self._less_than_100(solution)             # x <= 100
+                self.current_gen[i] = _less_than_100(solution)                  # x <= 100
 
         self._rank()                                                            # Sort the new values
 
-    @staticmethod
-    def _larger_than_100(value):
-        """Piecewise 1 of 2
-        x = -exp(-1) + (x - 100)(x - 102)
-        """
-        # TODO: floating point values
-        product = (value - 100) * (value - 102)                                 # (x - 100)(x - 102)
-        return -(math.exp(-1)) + product                                        # -exp(-1) + (x - 100)(x - 102)
 
-    @staticmethod
-    def _less_than_100(value):
-        """Piecewise 2 of 2
-        x = -exp(-(x / 100)^2))
-        """
-        inner = float(value / 100.0)                                            # (x / 100)
-        inner = -(math.pow(inner, 2))                                           # -(x / 100)^2)
-        return -(math.exp(inner))
 
     def _rank(self):
         """Sorts the Population by their fitness score
@@ -98,8 +83,8 @@ class BeliefSpace:
     def __init__(self):
         self.minima = -10
         self.maxima = 110
-        self.elites = []
-        self.super_elite = -10
+        self.elites = [[], []]
+        self.super_elite = [[], []]
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
@@ -165,6 +150,23 @@ class BeliefSpace:
         return (value - base_value) < -1e-21
 
 
+def _larger_than_100(value):
+    """Piecewise 1 of 2
+    x = -exp(-1) + (x - 100)(x - 102)
+    """
+    # TODO: floating point values
+    product = (value - 100) * (value - 102)                                     # (x - 100)(x - 102)
+    return -(math.exp(-1)) + product                                            # -exp(-1) + (x - 100)(x - 102)
+
+def _less_than_100(value):
+    """Piecewise 2 of 2
+    x = -exp(-(x / 100)^2))
+    """
+    inner = float(value / 100.0)                                                # (x / 100)
+    inner = -(math.pow(inner, 2))                                               # -(x / 100)^2)
+    return -(math.exp(inner))
+
+
 if __name__ == '__main__':
     time = 0
     endTime = 100
@@ -199,8 +201,10 @@ if __name__ == '__main__':
 #   End
 #
 #
+#
 # --| Overview of Major Methods |--
-# evaluate()/obj()
+#
+# evaluate() [i.e. obj()]
 #   - Evaluate each solution and find their fitness score
 #   - Rank solutions based on their fitness score f(x)
 #
