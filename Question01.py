@@ -107,8 +107,8 @@ class BeliefSpace:
         self.maxima_y = None
         self.elites = []
         self.super_elite = None
-        self.lower_bound_x = None
-        self.upper_bound_x = None
+        self.lower_bound_x = -10
+        self.upper_bound_x = 110
         self.step = 1.0                                                         # Amount to tend toward super elite
 
     def update(self, elites):
@@ -180,7 +180,7 @@ class BeliefSpace:
     def _out_of_good_range(self, x_value):
         """Checks if the x-value is out of the "good range"."""
         # CHECK: Precision. Possibly use same method as _mutation_value.
-        return self.lower_bound_x > x_value or x_value > self.upper_bound_x
+        return x_value < self.lower_bound_x or x_value > self.upper_bound_x
 
     def _good_range_value(self, x_value):
         """Returns the boundary value of the "good range" that x_value is closest to."""
