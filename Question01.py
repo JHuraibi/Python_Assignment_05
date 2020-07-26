@@ -19,14 +19,14 @@ class Solution:
     def __init__(self, x):
         self.x = x                                                              # Set x value
         self.y = None                                                           # Declare y variable
-        self.evaluate()                                                         # Calculate and set y-value
+        self.evaluate_solution()                                                         # Calculate and set y-value
 
     def __str__(self):
         x = format(self.x, '.21f')
         y = format(self.y, '.21f')
         return "x = %-.21s, y = %-.21s" % (x, y)
 
-    def evaluate(self):
+    def evaluate_solution(self):
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
         # CHECK: floating point values
@@ -69,29 +69,26 @@ class PopulationSpace:
         """Generates the initial 50 random solutions (i.e. the population).
         Values range from -10 to 110."""
         for i in range(50):
-            random_value = random.randint(-10, 100)
-            initial_solution = Solution(random_value)
-            self.current_gen.append(initial_solution)
+            random_value = random.randint(-10, 100)                             # Random value -10 to 100
+            initial_solution = Solution(random_value)                           # Initialize the solution with the value
+            self.current_gen.append(initial_solution)                           # Add to the initial generation
 
     def generate(self, next_gen):
         """Sets the current generation equal to the influenced and updated next generation."""
-        self.current_gen = next_gen
+        self.current_gen = next_gen                                             # Store the new generation of solutions
 
     def evaluate(self):
         """Indirectly evaluates the solutions (via each solution's evaluate() method.)"""
         # TODO: floating point values
         for solution in self.current_gen:                                       # Check value of each solution
-            solution.evaluate()
+            solution.evaluate_solution()                                        # Invoke class Solution evaluate method
 
         self._rank()                                                            # "Rank" the new values (i.e. sort)
 
     def _rank(self):
         """Sorts the Population by their fitness score (i.e. their y-value)
-        Fitness determined by piecewise function as defined by assignment instructions.
-        Note: Indexes can also intuitively associate a Solution's fitness.
-        e.g. index 0 is always the "Super Elite" and [0 to (size * 0.2)] are the "Elites".
-        """
-        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by Solutions' y-values
+        Fitness determined by piecewise function as defined by assignment instructions."""
+        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by solution y-values
 
     def accept(self):
         """Determines the individuals of the Population that will influence the Belief Space (i.e. the Elites).
@@ -99,7 +96,6 @@ class PopulationSpace:
         elite_threshold = len(self.current_gen) * 0.2                           #
         elite_threshold = math.ceil(elite_threshold)
         return self.current_gen[0:elite_threshold]
-        # self.super_elite = self.current_gen[0]
 
 
 class BeliefSpace:
@@ -118,7 +114,8 @@ class BeliefSpace:
         """Adds the experiences of the accepted individuals of the Population by:
         1. Recording the current generation's top performers (elites).
         2. Recording the current generation's minimum and maximum values.
-        "elites" is pre-sorted before being passed-in here."""
+        3. Update the Belief Space's normative knowledge.
+        List "elites" is pre-sorted before being passed-in."""
         self.elites = elites                                                    # Record the top-performers
         self.super_elite = elites[0]                                            # Record single, top performer
         self.minima_y = elites[-1].y                                            # Lowest solution value of elites
@@ -183,9 +180,9 @@ class BeliefSpace:
         distance_to_upper_bound = abs(x_value - self.upper_bound_x)             # How much x_value is from highest x
 
         if distance_to_lower_bound < distance_to_upper_bound:                   # x_value closer to upper or lower x?
-            return self.lower_bound_x                                           # ""
+            return self.lower_bound_x                                           # Was closer to lower, return lower
         else:
-            return self.upper_bound_x
+            return self.upper_bound_x                                           # Was closer to upper, return upper
 
     def _tend_toward_super_elite(self, x_value):
         """Returns an adjusted x-value. Adjust is to tend toward the x-value of the super elite's."""
@@ -219,35 +216,31 @@ class BeliefSpace:
 
 
 if __name__ == '__main__':
-    time = 0
-    endTime = 100                                                               # Dictates the number of "generations"
+    time = 0                                                                    # t
+    endTime = 100                                                               # How many "generations" to run
 
-    # main program
     population = PopulationSpace()                                              # Initialize Pt (t = 0)
     belief = BeliefSpace()                                                      # Initialize Bt (t = 0)
 
+    # --| Evolution loop |--
     while time < endTime:
         population.evaluate()                                                   # Evaluate Pt (t = time). AKA obj()
         belief.update(population.accept())                                      # Update Bt using accepted Pt values
         influenced = belief.influence(population.current_gen)                   # Influence next gen. using Bt knowledge
         population.generate(influenced)                                         # Generate the next generation
         time = time + 1                                                         # Increment time/generation
-    # end main program
+    # --| End Evolution loop |--
 
-    # Outputting
     print("Final Values\n")
     print("[Best]   ", end="")
-    print(population.current_gen[0])                                            # Super elite
+    print(population.current_gen[0])                                            # Super elite (1)
 
-    for j in range(1, 20):                                                      # Elites
+    for j in range(1, 20):                                                      # Remaining Elites (2 - 20)
         if j + 1 < 10:
-            print(" ", end="")                                                  # Extra space for when j is single-digit
+            print(" ", end="")                                                  # (Extra space when j is single-digit)
 
         print("  [%i]   " % (j + 1), end="")                                    # Line number
         print(population.current_gen[j])                                        # x and y value of individual solution
-
-    print("\nfin\n")
-
 
 # --| PseudoCode for Each Generation |--
 #   Begin
