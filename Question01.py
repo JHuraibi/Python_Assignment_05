@@ -42,9 +42,9 @@ class Solution:
         f(x) = -exp(-(x / 100)^2))
         """
         inner = float(value / 100.0)                                            # (x / 100)
-        inner = -(math.pow(inner, 2))                                           # -(x / 100)^2)
+        exponent = -(math.pow(inner, 2))                                        # -(x / 100)^2)
 
-        return -(math.exp(inner))                                               # -exp(-(x / 100)^2))
+        return -(math.exp(exponent))                                            # -exp(-(x / 100)^2))
 
 
 class PopulationSpace:
