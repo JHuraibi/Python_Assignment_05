@@ -165,10 +165,10 @@ class BeliefSpace:
     @staticmethod
     def _mutation_value(minimum, maximum):
         """Returns a random value between minimum and maximum with precision of 10."""
-        minimum = int(minimum * 1e10)
-        maximum = int(maximum * 1e10)
-        random_x_value = random.randint(minimum, maximum)
-        return random_x_value / 1e10
+        minimum = int(minimum * 1e10)                                           # Convert decimal to int
+        maximum = int(maximum * 1e10)                                           # Convert decimal to int
+        random_x_value = random.randint(minimum, maximum)                       # Get a random value between max and min
+        return random_x_value / 1e10                                            # Convert back to decimal
 
     @staticmethod
     def _greater_than(value, base_value):
