@@ -21,6 +21,9 @@ class Solution:
         self.y = None                                                           # Declare y variable
         self.evaluate()                                                         # Calculate and set y-value
 
+    def __str__(self):
+        return str("[x: {}], y = {}".format(self.x, self.y))                    # Override of object print
+
     def evaluate(self):
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
@@ -56,11 +59,6 @@ class PopulationSpace:
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
-
-    def __str__(self):
-        for solution in self.current_gen:
-            print("{} ".format(solution.y))
-        print("\n")
 
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
@@ -118,6 +116,7 @@ class BeliefSpace:
         self.maxima_x = None
         self.elites = []
         self.super_elite = None
+        self.step = 1.0                                                         # Adjust amount to tend to super elite
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
@@ -137,6 +136,7 @@ class BeliefSpace:
         next_generation = []                                                    # Redundant, but helps intuitive reading
         x_local_min = self.minima_x                                             # X of lower bound of current range
         x_local_max = self.maxima_x                                             # X of upper bound of current range
+        step = self.step
 
         for solution in current_gen:
             target = self.super_elite.y                                         # Best solution this generation
@@ -149,24 +149,25 @@ class BeliefSpace:
                 next_generation.append(solution)                                # Add mutated individual to next gen.
                 # print("[DEBUG]: Mutation")
             elif solution_value > target:
-                solution.y = solution.y - 1                                     # Tend DOWNWARD to best score thus far
+                solution.y = solution.y - step                                  # Tend DOWNWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
                 # print("[DEBUG]: MORE")
             elif solution_value < target:
-                solution.y = solution.y - 1                                     # Tend UPWARD to best score thus far
+                solution.y = solution.y + step                                  # Tend UPWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
                 # print("[DEBUG]: LESS")
             else:
                 next_generation.append(solution)                                # Individual is already at best value
                 # print("[DEBUG]: NONE")
 
+        self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
 
     @staticmethod
     def _mutation_value(minimum, maximum):
         """Returns a random value between the previous generation's minimum and maximum x-values.
         Able to handle min/max ranges containing negatives and/or decimals."""
-        # TODO: Use same range record
+        # TODO: Use same range as normative knowledge?
         # TODO: Need seed?
         value_range = abs(maximum - minimum)                                    # Absolute distance between min and max
         random_float = random.random()                                          # Get a random float [0.0, 1.0)
@@ -174,7 +175,6 @@ class BeliefSpace:
         random_offset = value_range * random_float                              # "Map" the range to the random float
 
         return minimum + random_offset                                          # Return the random number in the range
-
 
     @staticmethod
     def _greater_than(value, base_value):
@@ -194,24 +194,30 @@ class BeliefSpace:
         base_value = round(base_value, 20)
         return (value - base_value) < -1e-21
 
+    def _update_step_amount(self):
+        self.step = self.step / 2.0                                             # Halve the step amount
+
 
 if __name__ == '__main__':
     time = 0
-    endTime = 100
+    endTime = 1000
 
     population = PopulationSpace()
     belief = BeliefSpace()
 
     while time < endTime:
-        print("[Time: {}]\n".format(time))
+        print("\n[Generation: {}]\n".format(time))
+        print("SUPER ELITE: {}".format(population[0].y))
+
         population.evaluate()
         belief.update(population.accept())
         influenced = belief.influence(population.current_gen)
         population.generate(influenced)
         time = time + 1
 
-        print(population)
-
+    print("Final Values\n")
+    for solution in population.current_gen:
+        print(solution)
     print("\nfin\n")
 
 
