@@ -137,8 +137,6 @@ class BeliefSpace:
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         next_generation = []                                                    # Redundant, but helps intuitive reading
-        x_local_min = self.lower_bound_x                                        # Lower bound of current "good range"
-        x_local_max = self.upper_bound_x                                        # Upper bound of current "good range"
         step = self.step
 
         for solution in current_gen:
@@ -147,7 +145,7 @@ class BeliefSpace:
             solution_value = solution.y
 
             if mutation_occurs:
-                mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
+                mutation = self._mutation_value()                               # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_generation.append(solution)                                # Add mutated individual to next gen.
             elif self._out_of_good_range(solution.x):
@@ -165,9 +163,23 @@ class BeliefSpace:
         self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
 
+    def _mutation_value(self):
+        """Returns a random value between the previous generation's minimum and maximum x-values.
+        Able to handle min/max ranges containing negatives and/or decimals."""
+        # TODO: Use same range as normative knowledge?
+        # TODO: Need seed?
+        minimum = self.lower_bound_x                                            # Current local minimum
+        maximum = self.upper_bound_x                                            # Current local maximum
+        value_range = abs(maximum - minimum)                                    # Absolute distance between min and max
+
+        random_float = random.random()                                          # Get a random float [0.0, 1.0)
+        random_offset = value_range * random_float                              # "Map" the range to the random float
+
+        return minimum + random_offset                                          # Return the random number in the range
+
     def _out_of_good_range(self, x_value):
-        """Checks if the x-value is out of the good range."""
-        # CHECK: Precision. Possibly use same method as _mutation_value
+        """Checks if the x-value is out of the "good range"."""
+        # CHECK: Precision. Possibly use same method as _mutation_value.
         return self.lower_bound_x > x_value or x_value > self.upper_bound_x
 
     def _good_range_value(self, x_value):
@@ -179,19 +191,6 @@ class BeliefSpace:
             return self.lower_bound_x
         else:
             return self.upper_bound_x
-
-    @staticmethod
-    def _mutation_value(minimum, maximum):
-        """Returns a random value between the previous generation's minimum and maximum x-values.
-        Able to handle min/max ranges containing negatives and/or decimals."""
-        # TODO: Use same range as normative knowledge?
-        # TODO: Need seed?
-        value_range = abs(maximum - minimum)                                    # Absolute distance between min and max
-        random_float = random.random()                                          # Get a random float [0.0, 1.0)
-
-        random_offset = value_range * random_float                              # "Map" the range to the random float
-
-        return minimum + random_offset                                          # Return the random number in the range
 
     @staticmethod
     def _greater_than(value, base_value):
