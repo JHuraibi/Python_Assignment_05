@@ -2,7 +2,8 @@
 # Assignment: 5
 # Question: 1
 
-# CRITICAL: Global precision value
+# TODO: Normative knowledge
+# TODO: Global precision value
 # If time: Global SIZE for population size
 # If time: Fix purpose of docstrings
 # SIZE = 50
@@ -110,8 +111,10 @@ class PopulationSpace:
 class BeliefSpace:
     """Information of ancestors (i.e knowledge), accessed by current/future generations."""
     def __init__(self):
-        self.minima = None
-        self.maxima = None
+        self.minima_y = None
+        self.maxima_y = None
+        self.minima_x = None
+        self.maxima_x = None
         self.elites = []
         self.super_elite = []
 
@@ -120,32 +123,36 @@ class BeliefSpace:
         1. Recording the current generation's top performers (elites).
         2. Recording the current generation's minimum and maximum values.
         "elites" is pre-sorted before being passed-in here."""
-        self.elites = elites                                                    # Record the top-performers (plural)
-        self.super_elite = elites[0]                                            # Record single, top performer (single)
-        self.minima = elites[-1]                                                # Lowest value of the elites
-        self.maxima = elites[0]                                                 # Highest value of the elites
+        self.elites = elites                                                    # Record the top-performers
+        self.super_elite = elites[0]                                            # Record single, top performer
+        self.minima_x = elites[-1].x                                            # X-value of lowest value
+        self.minima_y = elites[-1].y                                            # Y-value of lowest value
+        self.maxima_x = elites[0].x                                             # X-value of highest value
+        self.maxima_y = elites[0].y                                             # Y-value of highest value
+
 
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
-        # TODO: Floor and ceiling. Remove below method.
+        # CHECK: Local min and max
         next_gen = []                                                           # Redundant, but helps intuitive reading
-        local_min = self.minima                                                 # Lower bound of current value range
-        local_max = self.maxima                                                 # Upper bound of current value range
+        x_local_min = self.minima_x                                             # Lower bound of current value range
+        x_local_max = self.maxima_x                                             # Upper bound of current value range
 
         for solution in current_gen:
             target = self.super_elite                                           # Best solution this generation
             mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
+            solution_value = solution.y
 
             if mutation_occurs:
-                mutation = self._mutation_value(local_min, local_max)           # Generate a randomized mutation value
+                mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_gen.append(solution)                                       # Add mutated individual to next gen.
                 print("[DEBUG]: Mutation")
-            elif self._greater_than(solution, target):
+            elif solution_value > target:
                 solution.y = solution.y - 1                                     # Tend DOWNWARD to best score thus far
                 next_gen.append(solution)                                       # Add updated individual to next gen.
                 print("[DEBUG]: MORE")
-            elif self._less_than(solution, target):
+            elif solution_value < target:
                 solution.y = solution.y - 1                                     # Tend UPWARD to best score thus far
                 next_gen.append(solution)                                       # Add updated individual to next gen.
                 print("[DEBUG]: LESS")
@@ -157,10 +164,11 @@ class BeliefSpace:
 
     @staticmethod
     def _mutation_value(minimum, maximum):
-        """Returns a random value between minimum and maximum while accounting for decimal precision."""
-        minimum = minimum * 1e20
-        maximum = maximum * 1e20
-        return random.randint(minimum, maximum) / 1e20
+        """Returns a random value between minimum and maximum with precision of 10."""
+        minimum = int(minimum * 1e10)
+        maximum = int(maximum * 1e10)
+        random_x_value = random.randint(minimum, maximum)
+        return random_x_value / 1e10
 
     @staticmethod
     def _greater_than(value, base_value):
