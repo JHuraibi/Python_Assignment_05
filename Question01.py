@@ -107,7 +107,7 @@ class BeliefSpace:
         self.maxima_y = None
         self.elites = []
         self.super_elite = None
-        self.low_bound_x = None
+        self.lower_bound_x = None
         self.upper_bound_x = None
         self.step = 1.0                                                         # Amount to tend toward super elite
 
@@ -124,43 +124,61 @@ class BeliefSpace:
 
     def _update_normative_knowledge(self, new_elites):
         """Updates the x-values of the "good range" of solutions."""
-        new_elites
+        new_elites = sorted(new_elites, key=lambda solution: solution.x)        # Sort the new elites by their x-values
+        new_elites_upper_x = new_elites[-1].x                                   # Highest x-value of the new elites
+        new_elites_lower_x = new_elites[0].x                                    # Lowest x-value of the new elites
 
+        if new_elites_upper_x > self.upper_bound_x:
+            self.upper_bound_x = new_elites_upper_x                             # Highest x of new elites is new highest
+
+        if new_elites_lower_x < self.lower_bound_x:
+            self.lower_bound_x = new_elites_lower_x                             # Lowest x of new elites is new lowest
 
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
-        # CHECK: Normative knowledge
-        next_generation = []  # Redundant, but helps intuitive reading
-        x_local_min = self.low_bound_x  # X of lower bound of current range
-        x_local_max = self.upper_bound_x  # X of upper bound of current range
+        next_generation = []                                                    # Redundant, but helps intuitive reading
+        x_local_min = self.lower_bound_x                                        # Lower bound of current "good range"
+        x_local_max = self.upper_bound_x                                        # Upper bound of current "good range"
         step = self.step
 
         for solution in current_gen:
-            target = self.super_elite.y  # Best solution this generation
-            mutation_occurs = random.randint(0, 1)  # 50% prob. of applying random value
+            target = self.super_elite.y                                         # Best solution this generation
+            mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
             solution_value = solution.y
 
             if mutation_occurs:
-                mutation = self._mutation_value(x_local_min, x_local_max)  # Generate a randomized mutation value
-                solution.x = mutation  # Store the mutated value
-                next_generation.append(solution)  # Add mutated individual to next gen.
-            elif self._out_of_good_range():
-
+                mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
+                solution.x = mutation                                           # Store the mutated value
+                next_generation.append(solution)                                # Add mutated individual to next gen.
+            elif self._out_of_good_range(solution.x):
+                solution.x = self._good_range_value(solution.x)                 # Put x-value into the "good range"
+                next_generation.append(solution)                                # Add updated individual to next gen.
             elif solution_value > target:
-                solution.y = solution.y - step  # Tend DOWNWARD to best score thus far
-                next_generation.append(solution)  # Add updated individual to next gen.
+                solution.y = solution.y - step                                  # Tend DOWNWARD to best score thus far
+                next_generation.append(solution)                                # Add updated individual to next gen.
             elif solution_value < target:
-                solution.y = solution.y + step  # Tend UPWARD to best score thus far
-                next_generation.append(solution)  # Add updated individual to next gen.
+                solution.y = solution.y + step                                  # Tend UPWARD to best score thus far
+                next_generation.append(solution)                                # Add updated individual to next gen.
             else:
-                next_generation.append(solution)  # Individual is already at best value
+                next_generation.append(solution)                                # Individual is already at best value
 
-        self._update_step_amount()  # Update the step
-        return next_generation  # Return the new (influenced) generation
+        self._update_step_amount()                                              # Update the step
+        return next_generation                                                  # Return the new (influenced) generation
 
-    def _out_of_good_range(self):
+    def _out_of_good_range(self, x_value):
         """Checks if the x-value is out of the good range."""
-        pass
+        # CHECK: Precision. Possibly use same method as _mutation_value
+        return self.lower_bound_x > x_value or x_value > self.upper_bound_x
+
+    def _good_range_value(self, x_value):
+        """Returns the boundary value of the "good range" that x_value is closest to."""
+        distance_to_lower_bound = abs(x_value - self.lower_bound_x)
+        distance_to_upper_bound = abs(x_value - self.upper_bound_x)
+
+        if distance_to_lower_bound < distance_to_upper_bound:
+            return self.lower_bound_x
+        else:
+            return self.upper_bound_x
 
     @staticmethod
     def _mutation_value(minimum, maximum):
