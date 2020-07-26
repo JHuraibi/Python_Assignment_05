@@ -131,13 +131,12 @@ class BeliefSpace:
         self.maxima_x = elites[0].x                                             # X-value of highest value
         self.maxima_y = elites[0].y                                             # Y-value of highest value
 
-
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
         # CHECK: Local min and max
-        next_gen = []                                                           # Redundant, but helps intuitive reading
-        x_local_min = self.minima_x                                             # Lower bound of current value range
-        x_local_max = self.maxima_x                                             # Upper bound of current value range
+        next_generation = []                                                    # Redundant, but helps intuitive reading
+        x_local_min = self.minima_x                                             # X of lower bound of current range
+        x_local_max = self.maxima_x                                             # X of upper bound of current range
 
         for solution in current_gen:
             target = self.super_elite.y                                         # Best solution this generation
@@ -147,39 +146,34 @@ class BeliefSpace:
             if mutation_occurs:
                 mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
-                next_gen.append(solution)                                       # Add mutated individual to next gen.
+                next_generation.append(solution)                                # Add mutated individual to next gen.
                 # print("[DEBUG]: Mutation")
             elif solution_value > target:
                 solution.y = solution.y - 1                                     # Tend DOWNWARD to best score thus far
-                next_gen.append(solution)                                       # Add updated individual to next gen.
+                next_generation.append(solution)                                # Add updated individual to next gen.
                 # print("[DEBUG]: MORE")
             elif solution_value < target:
                 solution.y = solution.y - 1                                     # Tend UPWARD to best score thus far
-                next_gen.append(solution)                                       # Add updated individual to next gen.
+                next_generation.append(solution)                                # Add updated individual to next gen.
                 # print("[DEBUG]: LESS")
             else:
-                next_gen.append(solution)                                       # Individual is already at best value
+                next_generation.append(solution)                                # Individual is already at best value
                 # print("[DEBUG]: NONE")
 
-        return next_gen                                                         # Return the new (influenced) generation
+        return next_generation                                                  # Return the new (influenced) generation
 
     @staticmethod
     def _mutation_value(minimum, maximum):
-        """Returns a random value between minimum and maximum.
-        Will handle decimals with a precision of 10.
-        """
-        # TODO: Precision when min or max is decimal and other is not
-        min_mod = 1.0
-        max_mod = 1.0
-        if 0.0 > minimum > -1.0:
-            min_mod = 1e10
-        if 0.0 > maximum > -1.0:
-            max_mod = 1e10
+        """Returns a random value between the previous generation's minimum and maximum x-values.
+        Able to handle min/max ranges containing negatives and/or decimals."""
+        # TODO: Use same range record
+        # TODO: Need seed?
+        value_range = abs(maximum - minimum)                                    # Absolute distance between min and max
+        random_float = random.random()                                          # Get a random float [0.0, 1.0)
 
-        minimum = int(minimum * min_mod)                                        # Truncate decimals beyond 10 (if exist)
-        maximum = int(maximum * max_mod)                                        # Truncate decimals beyond 10 (if exist)
-        random_x_value = random.randint(minimum, maximum)                       # Get a random value between max and min
-        return random_x_value / 1e10                                            # Convert back to decimal
+        random_offset = value_range * random_float                              # "Map" the range to the random float
+
+        return minimum + random_offset                                          # Return the random number in the range
 
     @staticmethod
     def test_mutation_value(minimum, maximum):
