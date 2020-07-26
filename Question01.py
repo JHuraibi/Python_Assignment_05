@@ -89,8 +89,8 @@ class PopulationSpace:
         self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by Solutions' y-value
 
     def accept(self):
-        """Determines the individuals of the Population that will influence
-        the Belief Space (i.e. the Elites)."""
+        """Determines the individuals of the Population that will influence the Belief Space (i.e. the Elites).
+        The Population is already sorted/ranked beforehand."""
         low_bound = len(self.current_gen) * 0.2
         low_bound = math.ceil(low_bound)
         return self.current_gen[0:low_bound]
@@ -127,28 +127,30 @@ class BeliefSpace:
 
     def influence(self, current_gen):
         """Generates the next generation's individuals using knowledge from the Belief Space."""
-        pop_size = len(current_gen)                                             # Number of individuals in population
-
-        next_gen = [None] * pop_size                                            # Redundant, but helps intuitive reading
+        # TODO: Floor and ceiling. Remove below method.
+        next_gen = []                                                           # Redundant, but helps intuitive reading
         local_min = self.minima                                                 # Lower bound of current value range
         local_max = self.maxima                                                 # Upper bound of current value range
 
-        for i in range(0, pop_size):
-            solution = current_gen[i]                                           # Intermediate var.
-            target = self.super_elite                                           #
+        for solution in current_gen:
+            target = self.super_elite                                           # Best solution this generation
             mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
 
             if mutation_occurs:
-                next_gen[i] = self._mutation_value(local_min, local_max)        # Apply a randomized mutation value
+                mutation = self._mutation_value(local_min, local_max)           # Generate a randomized mutation value
+                solution.x = mutation                                           # Store the mutated value
+                next_gen.append(solution)                                       # Add mutated individual to next gen.
                 print("[DEBUG]: Mutation")
             elif self._greater_than(solution, target):
-                next_gen[i] = solution - 1                                      # Tend downward to top score thus far
+                solution.y = solution.y - 1                                     # Tend DOWNWARD to best score thus far
+                next_gen.append(solution)                                       # Add updated individual to next gen.
                 print("[DEBUG]: MORE")
             elif self._less_than(solution, target):
-                next_gen[i] = solution + 1                                      # Tend upward to top score thus far
+                solution.y = solution.y - 1                                     # Tend UPWARD to best score thus far
+                next_gen.append(solution)                                       # Add updated individual to next gen.
                 print("[DEBUG]: LESS")
             else:
-                next_gen[i] = current_gen[i]                                    # Already equivalent to super-elite
+                next_gen.append(solution)                                       # Individual is already at best value
                 print("[DEBUG]: NONE")
 
         return next_gen                                                         # Return the new (influenced) generation
