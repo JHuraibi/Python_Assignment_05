@@ -103,15 +103,16 @@ class PopulationSpace:
 
 
 class BeliefSpace:
-    """Information of ancestors (i.e knowledge), accessed by current/future generations."""
+    """Information of ancestors (i.e knowledge).
+     Influenced by current generations and accessed by future generations."""
     def __init__(self):
-        self.minima_y = None
-        self.maxima_y = None
         self.elites = []
         self.super_elite = None
-        self.lower_bound_x = -10
-        self.upper_bound_x = 110
-        self.step = 1.0                                                         # Amount to tend toward super elite
+        self.minima_y = None                                                    # Lowest solution value of the Elites
+        self.maxima_y = None                                                    # Highest solution value of the Elites
+        self.lower_bound_x = -10                                                # Lowest x-value of the Elites (so far)
+        self.upper_bound_x = 110                                                # Highest x-value of the Elites (so far)
+        self.step = 1.0                                                         # Amount to tend x toward super elite
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
@@ -148,15 +149,12 @@ class BeliefSpace:
                 mutation = self._mutation_value()                               # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_generation.append(solution)                                # Add mutated individual to next gen.
-                print("[DEBUG - Mutation]")
             elif self._out_of_good_range(solution.x):
                 solution.x = self._good_range_value(solution.x)                 # Put x-value into the "good range"
                 next_generation.append(solution)                                # Add updated individual to next gen.
-                print("[DEBUG - Out of good range]")
             else:
                 solution.x = self._tend_toward_super_elite(solution.x)
                 next_generation.append(solution)                                # Individual is already at best value
-                print("[DEBUG - Tending]")
 
         self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
@@ -164,8 +162,6 @@ class BeliefSpace:
     def _mutation_value(self):
         """Returns a random value between the previous generation's minimum and maximum x-values.
         Able to handle min/max ranges containing negatives and/or decimals."""
-        # TODO: Use same range as normative knowledge?
-        # TODO: Need seed?
         minimum = self.lower_bound_x                                            # Current local minimum
         maximum = self.upper_bound_x                                            # Current local maximum
         value_range = abs(maximum - minimum)                                    # Absolute distance between min and max
@@ -178,15 +174,16 @@ class BeliefSpace:
     def _out_of_good_range(self, x_value):
         """Checks if the x-value is out of the "good range"."""
         # CHECK: Precision. Possibly use same method as _mutation_value.
-        return x_value < self.lower_bound_x or x_value > self.upper_bound_x
+        return x_value < self.lower_bound_x or x_value > self.upper_bound_x     # Is x_value within the "good range"?
 
     def _good_range_value(self, x_value):
-        """Returns the boundary value of the "good range" that x_value is closest to."""
-        distance_to_lower_bound = abs(x_value - self.lower_bound_x)
-        distance_to_upper_bound = abs(x_value - self.upper_bound_x)
+        """Returns the boundary value of the "good range" that x_value is closest to.
+        Allows solution x-values to "jump into the good range". """
+        distance_to_lower_bound = abs(x_value - self.lower_bound_x)             # How much x_value is from lowest x
+        distance_to_upper_bound = abs(x_value - self.upper_bound_x)             # How much x_value is from highest x
 
-        if distance_to_lower_bound < distance_to_upper_bound:
-            return self.lower_bound_x
+        if distance_to_lower_bound < distance_to_upper_bound:                   # x_value closer to upper or lower x?
+            return self.lower_bound_x                                           # ""
         else:
             return self.upper_bound_x
 
@@ -217,26 +214,27 @@ class BeliefSpace:
         return (value - base_value) < -1e-21
 
     def _update_step_amount(self):
+        """Fine-tunes the value that Solution x-values will be adjusted by next generation."""
         self.step = self.step / 2.0                                             # Halve the step amount
 
 
 if __name__ == '__main__':
     time = 0
-    endTime = 100
+    endTime = 100                                                               # Dictates the number of "generations"
 
-    population = PopulationSpace()
-    belief = BeliefSpace()
+    # main program
+    population = PopulationSpace()                                              # Initialize Pt (t = 0)
+    belief = BeliefSpace()                                                      # Initialize Bt (t = 0)
 
     while time < endTime:
-        print("\n[Generation: {}]\n".format(time))
-        print("SUPER ELITE: {}".format(population.current_gen[0].y))
+        population.evaluate()                                                   # Evaluate Pt (t = time). AKA obj()
+        belief.update(population.accept())                                      # Update Bt using accepted Pt values
+        influenced = belief.influence(population.current_gen)                   # Influence next gen. using Bt knowledge
+        population.generate(influenced)                                         # Generate the next generation
+        time = time + 1                                                         # Increment time/generation
+    # end main program
 
-        population.evaluate()
-        belief.update(population.accept())
-        influenced = belief.influence(population.current_gen)
-        population.generate(influenced)
-        time = time + 1
-
+    # Outputting
     print("Final Values\n")
     print("[Best]   ", end="")
     print(population.current_gen[0])                                            # Super elite
@@ -285,31 +283,3 @@ if __name__ == '__main__':
 #       - compare each solution to the super elite(the best solution)and take one step toward that.
 #       - With a probability of 50% introduce a mutation to a solution by changing
 #           the value randomly within the recorded min and max.
-
-
-
-    # def __str__(self):
-    #     x = format(self.x, '.21f')
-    #     y = format(self.y, '.21f')
-    #     x_pad = ""                                                              # Padding for output of x value
-    #     y_pad = ""                                                              # Padding for output of y value
-    #
-    #
-    #     if float(x) > 0.0:
-    #         x_pad = x_pad + " "                                                 # x has no negative sign
-    #
-    #     if abs(float(x)) < 10.0:
-    #         x_pad = x_pad + "  "                                                # x has no 100's and 10's place
-    #     elif abs(float(x)) < 100.0:
-    #         x_pad = x_pad + " "                                                 # x has no 100's place
-    #
-    #     if float(y) > 0.0:
-    #         y_pad = y_pad + " "                                                 # y has no negative sign
-    #
-    #     if abs(float(y)) < 10.0:
-    #         y_pad = y_pad + "  "                                                # y has no 100's and 10's place
-    #     elif abs(float(y)) < 100.0:
-    #         y_pad = y_pad + " "                                                 # y has no 100's place
-    #
-    #
-    #     return "x = %s%-21.18s, %s y = %-18.15s" % (x_pad, x, y_pad, y)
