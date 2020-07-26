@@ -22,24 +22,15 @@ class Solution:
         self.evaluate()                                                         # Calculate and set y-value
 
     def __str__(self):
-        x = str(self.x).zfill(10)
-        y = str(self.y).zfill(10)
-        x_sp_mod = " "                                                          # Output padding
-        y_sp_mod = " "
-
-        if float(x) < 0.0:
-            x_sp_mod = " "                                                      # Don't pad if x has a "-" sign
-
-        if float(y) < 0.0:
-            y_sp_mod = " "                                                      # Don't pad if y has a "-" sign
-
-        return "x = %s%2.16s, y = %s%2.16s" % (x_sp_mod, x, y_sp_mod, y)        # Override of print()
+        x = format(self.x, '.21f')
+        y = format(self.y, '.21f')
+        return "x = %-.21s, y = %-.21s" % (x, y)
 
     def evaluate(self):
         """Evaluates the performance of the Population's individuals.
         Method defined as "obj()" in academic paper."""
-        # TODO: floating point values
-        if self.x > (100.0 + 1e-18):                                            # 100.000 000 000 000 000 000 0
+        # CHECK: floating point values
+        if self.x > (100.0 + 1e-18):
             self.y = self._larger_than_100(self.x)                              # x > 100
         else:
             self.y = self._less_than_100(self.x)                                # x <= 100
@@ -247,10 +238,16 @@ if __name__ == '__main__':
         time = time + 1
 
     print("Final Values\n")
-    print("Best: ", end="")
-    print(population.current_gen[0])
-    for j in range(1, 20):
-        print(population.current_gen[j])
+    print("[Best]   ", end="")
+    print(population.current_gen[0])                                            # Super elite
+
+    for j in range(1, 20):                                                      # Elites
+        if j + 1 < 10:
+            print(" ", end="")                                                  # Extra space for when j is single-digit
+
+        print("  [%i]   " % (j + 1), end="")                                    # Line number
+        print(population.current_gen[j])                                        # x and y value of individual solution
+
     print("\nfin\n")
 
 
@@ -291,3 +288,28 @@ if __name__ == '__main__':
 
 
 
+    # def __str__(self):
+    #     x = format(self.x, '.21f')
+    #     y = format(self.y, '.21f')
+    #     x_pad = ""                                                              # Padding for output of x value
+    #     y_pad = ""                                                              # Padding for output of y value
+    #
+    #
+    #     if float(x) > 0.0:
+    #         x_pad = x_pad + " "                                                 # x has no negative sign
+    #
+    #     if abs(float(x)) < 10.0:
+    #         x_pad = x_pad + "  "                                                # x has no 100's and 10's place
+    #     elif abs(float(x)) < 100.0:
+    #         x_pad = x_pad + " "                                                 # x has no 100's place
+    #
+    #     if float(y) > 0.0:
+    #         y_pad = y_pad + " "                                                 # y has no negative sign
+    #
+    #     if abs(float(y)) < 10.0:
+    #         y_pad = y_pad + "  "                                                # y has no 100's and 10's place
+    #     elif abs(float(y)) < 100.0:
+    #         y_pad = y_pad + " "                                                 # y has no 100's place
+    #
+    #
+    #     return "x = %s%-21.18s, %s y = %-18.15s" % (x_pad, x, y_pad, y)
