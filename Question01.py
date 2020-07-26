@@ -22,7 +22,18 @@ class Solution:
         self.evaluate()                                                         # Calculate and set y-value
 
     def __str__(self):
-        return str("x = {}, y = {}".format(self.x, self.y))                    # Override of object print
+        x = str(self.x).zfill(10)
+        y = str(self.y).zfill(10)
+        x_sp_mod = " "                                                          # Output padding
+        y_sp_mod = " "
+
+        if float(x) < 0.0:
+            x_sp_mod = " "                                                      # Don't pad if x has a "-" sign
+
+        if float(y) < 0.0:
+            y_sp_mod = " "                                                      # Don't pad if y has a "-" sign
+
+        return "x = %s%2.16s, y = %s%2.16s" % (x_sp_mod, x, y_sp_mod, y)        # Override of print()
 
     def evaluate(self):
         """Evaluates the performance of the Population's individuals.
@@ -140,9 +151,7 @@ class BeliefSpace:
         step = self.step
 
         for solution in current_gen:
-            target = self.super_elite.y                                         # Best solution this generation
             mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
-            solution_value = solution.y
 
             if mutation_occurs:
                 mutation = self._mutation_value()                               # Generate a randomized mutation value
@@ -191,7 +200,8 @@ class BeliefSpace:
             return self.upper_bound_x
 
     def _tend_toward_super_elite(self, x_value):
-        target = self.super_elite.x
+        """Returns an adjusted x-value. Adjust is to tend toward the x-value of the super elite's."""
+        target = self.super_elite.x                                             # x-value of best solution (super elite)
         if x_value > target:
             return x_value - self.step                                          # Tend DOWNWARD to best score thus far
         else:
