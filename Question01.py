@@ -2,14 +2,6 @@
 # Assignment: 5
 # Question: 1
 
-# TODO: Normative knowledge
-# TODO: Global precision value
-# TODO: Comments
-# If time: Global SIZE for population size
-# If time: Fix purpose of docstrings
-# SIZE = 50
-
-
 import math
 import random
 
@@ -19,7 +11,7 @@ class Solution:
     def __init__(self, x):
         self.x = x                                                              # Set x value
         self.y = None                                                           # Declare y variable
-        self.evaluate_solution()                                                         # Calculate and set y-value
+        self.evaluate_solution()                                                # Calculate and set y-value
 
     def __str__(self):
         x = format(self.x, '.21f')
@@ -37,21 +29,22 @@ class Solution:
 
     @staticmethod
     def _larger_than_100(value):
-        """Piecewise 1 of 2
-        x = -exp(-1) + (x - 100)(x - 102)
-        """
-        # TODO: floating point values
-        product = (value - 100) * (value - 102)  # (x - 100)(x - 102)
-        return -(math.exp(-1)) + product  # -exp(-1) + (x - 100)(x - 102)
+        """Returns value for Fitness Piecewise 1 of 2:
+         f(x) = -exp(-1) + (x - 100)(x - 102)
+         """
+        product = (value - 100) * (value - 102)                                 # (x - 100)(x - 102)
+
+        return -(math.exp(-1)) + product                                        # -exp(-1) + (x - 100)(x - 102)
 
     @staticmethod
     def _less_than_100(value):
-        """Piecewise 2 of 2
-        x = -exp(-(x / 100)^2))
+        """Returns value for Fitness Piecewise 2 of 2:
+        f(x) = -exp(-(x / 100)^2))
         """
-        inner = float(value / 100.0)  # (x / 100)
-        inner = -(math.pow(inner, 2))  # -(x / 100)^2)
-        return -(math.exp(inner))
+        inner = float(value / 100.0)                                            # (x / 100)
+        inner = -(math.pow(inner, 2))                                           # -(x / 100)^2)
+
+        return -(math.exp(inner))                                               # -exp(-(x / 100)^2))
 
 
 class PopulationSpace:
@@ -95,8 +88,9 @@ class PopulationSpace:
         The Population is already sorted/ranked beforehand.
         If population is static at 50, then will always be 10."""
         elite_threshold = len(self.current_gen) * 0.2                           # 20% of population size
-        elite_threshold = math.ceil(elite_threshold)
-        return self.current_gen[0:elite_threshold]
+        elite_threshold = math.ceil(elite_threshold)                            # Include fractional Solution (if exist)
+
+        return self.current_gen[0:elite_threshold]                              # Return Solution 1 to (threshold + 1)
 
 
 class BeliefSpace:
@@ -224,21 +218,6 @@ if __name__ == '__main__':
         print("  [%i]   " % (j + 1), end="")                                    # Line number
         print(population.current_gen[j])                                        # x and y value of individual solution
 
-# --| PseudoCode for Each Generation |--
-#   Begin
-#       t = 0                                       #
-#       initialize Bt, Pt                           #
-#       repeat
-#           evaluate Pt                             #
-#           update(Bt, accept(Pt))                  # ?staticmethod
-#           generate(Pt, influence(Bt))             # ?staticmethod
-#           t = t + 1;                              # update time
-#           select Pt from Pt - 1                   # ?remove 1 solution
-#           until(termination condition achieved)   # check loop condition
-#   End
-#
-#
-#
 # --| Overview of Major Methods |--
 #
 # evaluate() [i.e. obj()]
@@ -258,3 +237,4 @@ if __name__ == '__main__':
 #       - compare each solution to the super elite(the best solution)and take one step toward that.
 #       - With a probability of 50% introduce a mutation to a solution by changing
 #           the value randomly within the recorded min and max.
+
