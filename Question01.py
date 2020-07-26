@@ -22,7 +22,7 @@ class Solution:
         self.evaluate()                                                         # Calculate and set y-value
 
     def __str__(self):
-        return str("[x: {}], y = {}".format(self.x, self.y))                    # Override of object print
+        return str("x = {}, y = {}".format(self.x, self.y))                    # Override of object print
 
     def evaluate(self):
         """Evaluates the performance of the Population's individuals.
@@ -59,6 +59,9 @@ class PopulationSpace:
         self.range_lower_bound = -10
         self.range_upper_bound = 110
         self._initial_population()
+
+    def __getitem__(self, item):
+        return population[item]
 
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
@@ -100,12 +103,6 @@ class PopulationSpace:
         """Checks if the value is a new min or max"""
         pass
 
-    def _update_range(self):
-        """Updates the current range of the solution values"""
-        # TODO: Remove either min/max or the bound variables (redundant)
-        self.range_lower_bound = self.min
-        self.range_upper_bound = self.max
-
 
 class BeliefSpace:
     """Information of ancestors (i.e knowledge), accessed by current/future generations."""
@@ -116,7 +113,7 @@ class BeliefSpace:
         self.maxima_x = None
         self.elites = []
         self.super_elite = None
-        self.step = 1.0                                                         # Adjust amount to tend to super elite
+        self.step = 1.0                                                         # Amount to tend toward super elite
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
@@ -147,18 +144,14 @@ class BeliefSpace:
                 mutation = self._mutation_value(x_local_min, x_local_max)       # Generate a randomized mutation value
                 solution.x = mutation                                           # Store the mutated value
                 next_generation.append(solution)                                # Add mutated individual to next gen.
-                # print("[DEBUG]: Mutation")
             elif solution_value > target:
                 solution.y = solution.y - step                                  # Tend DOWNWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
-                # print("[DEBUG]: MORE")
             elif solution_value < target:
                 solution.y = solution.y + step                                  # Tend UPWARD to best score thus far
                 next_generation.append(solution)                                # Add updated individual to next gen.
-                # print("[DEBUG]: LESS")
             else:
                 next_generation.append(solution)                                # Individual is already at best value
-                # print("[DEBUG]: NONE")
 
         self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
@@ -200,14 +193,14 @@ class BeliefSpace:
 
 if __name__ == '__main__':
     time = 0
-    endTime = 1000
+    endTime = 100
 
     population = PopulationSpace()
     belief = BeliefSpace()
 
     while time < endTime:
         print("\n[Generation: {}]\n".format(time))
-        print("SUPER ELITE: {}".format(population[0].y))
+        print("SUPER ELITE: {}".format(population.current_gen[0].y))
 
         population.evaluate()
         belief.update(population.accept())
@@ -216,8 +209,8 @@ if __name__ == '__main__':
         time = time + 1
 
     print("Final Values\n")
-    for solution in population.current_gen:
-        print(solution)
+    for i in range(20):
+        print(population.current_gen[i])
     print("\nfin\n")
 
 
