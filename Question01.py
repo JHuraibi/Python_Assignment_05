@@ -92,15 +92,15 @@ class PopulationSpace:
 
     def accept(self):
         """Determines the individuals of the Population that will influence the Belief Space (i.e. the Elites).
-        The Population is already sorted/ranked beforehand."""
-        elite_threshold = len(self.current_gen) * 0.2                           #
+        The Population is already sorted/ranked beforehand.
+        If population is static at 50, then will always be 10."""
+        elite_threshold = len(self.current_gen) * 0.2                           # 20% of population size
         elite_threshold = math.ceil(elite_threshold)
         return self.current_gen[0:elite_threshold]
 
 
 class BeliefSpace:
-    """Information of ancestors (i.e knowledge).
-     Influenced by current generations and accessed by future generations."""
+    """Information, or knowledge, of ancestors. Influenced by current generations and accessed by future generations."""
     def __init__(self):
         self.elites = []
         self.super_elite = None
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     print("[Best]   ", end="")
     print(population.current_gen[0])                                            # Super elite (1)
 
-    for j in range(1, 20):                                                      # Remaining Elites (2 - 20)
+    for j in range(1, 10):                                                      # Remaining Elites (2 - 10)
         if j + 1 < 10:
             print(" ", end="")                                                  # (Extra space when j is single-digit)
 
