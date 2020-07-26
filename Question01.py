@@ -96,9 +96,9 @@ class PopulationSpace:
     def accept(self):
         """Determines the individuals of the Population that will influence the Belief Space (i.e. the Elites).
         The Population is already sorted/ranked beforehand."""
-        low_bound = len(self.current_gen) * 0.2
-        low_bound = math.ceil(low_bound)
-        return self.current_gen[0:low_bound]
+        elite_threshold = len(self.current_gen) * 0.2                           #
+        elite_threshold = math.ceil(elite_threshold)
+        return self.current_gen[0:elite_threshold]
         # self.super_elite = self.current_gen[0]
 
 
