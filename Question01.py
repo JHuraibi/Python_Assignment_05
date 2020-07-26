@@ -4,6 +4,7 @@
 
 # CRITICAL: Global precision value
 # If time: Global SIZE for population size
+# If time: Fix purpose of docstrings
 # SIZE = 50
 
 
@@ -12,6 +13,7 @@ import random
 
 
 class Solution:
+    """The Individuals of each Generation."""
     def __init__(self, x):
         self.x = x                                                              # Set x value
         self.y = None                                                           # Declare y variable
@@ -71,24 +73,24 @@ class PopulationSpace:
         self.current_gen = next_gen
 
     def evaluate(self):
-        """Indirectly evaluates the (via Solution.evaluate())"""
+        """Indirectly evaluates the solutions (via each solution's evaluate() method.)"""
         # TODO: floating point values
         for solution in self.current_gen:                                       # Check value of each solution
             solution.evaluate()
 
-        self._rank()                                                            # Sort the new values
+        self._rank()                                                            # "Rank" the new values (i.e. sort)
 
     def _rank(self):
         """Sorts the Population by their fitness score (i.e. their y-value)
-        Fitness: piecewise function as defined by assignment instructions.
-        Indexes can also intuitively associate a Solution's fitness.
+        Fitness determined by piecewise function as defined by assignment instructions.
+        Note: Indexes can also intuitively associate a Solution's fitness.
         e.g. index 0 is always the "Super Elite" and [0 to (size * 0.2)] are the "Elites".
         """
-        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)
+        self.current_gen = sorted(self.current_gen, key=lambda solution: solution.y)    # Sort by Solutions' y-value
 
     def accept(self):
         """Determines the individuals of the Population that will influence
-        the Belief Space."""
+        the Belief Space (i.e. the Elites)."""
         low_bound = len(self.current_gen) * 0.2
         low_bound = math.ceil(low_bound)
         return self.current_gen[0:low_bound]
@@ -108,16 +110,16 @@ class PopulationSpace:
 class BeliefSpace:
     """Information of ancestors (i.e knowledge), accessed by current/future generations."""
     def __init__(self):
-        self.minima = -10
-        self.maxima = 110
-        self.elites = [[], []]
-        self.super_elite = [[], []]
+        self.minima = None
+        self.maxima = None
+        self.elites = []
+        self.super_elite = []
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
         1. Recording the current generation's top performers (elites).
         2. Recording the current generation's minimum and maximum values.
-        "elites" is presorted (descending) by the Population class before being passed-in here."""
+        "elites" is pre-sorted before being passed-in here."""
         self.elites = elites                                                    # Record the top-performers (plural)
         self.super_elite = elites[0]                                            # Record single, top performer (single)
         self.minima = elites[-1]                                                # Lowest value of the elites
@@ -133,7 +135,7 @@ class BeliefSpace:
 
         for i in range(0, pop_size):
             solution = current_gen[i]                                           # Intermediate var.
-            target = self.super_elite
+            target = self.super_elite                                           #
             mutation_occurs = random.randint(0, 1)                              # 50% prob. of applying random value
 
             if mutation_occurs:
