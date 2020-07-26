@@ -153,17 +153,10 @@ class BeliefSpace:
                 solution.x = self._good_range_value(solution.x)                 # Put x-value into the "good range"
                 next_generation.append(solution)                                # Add updated individual to next gen.
                 print("[DEBUG - Out of good range]")
-            elif solution_value > target:
-                solution.y = solution.y - step                                  # Tend DOWNWARD to best score thus far
-                next_generation.append(solution)                                # Add updated individual to next gen.
-                print("[DEBUG - Above target]")
-            elif solution_value < target:
-                solution.y = solution.y + step                                  # Tend UPWARD to best score thus far
-                next_generation.append(solution)                                # Add updated individual to next gen.
-                print("[DEBUG - Below target]")
             else:
+                solution.x = self._tend_toward_super_elite(solution.x)
                 next_generation.append(solution)                                # Individual is already at best value
-                print("[DEBUG - Good]")
+                print("[DEBUG - Tending]")
 
         self._update_step_amount()                                              # Update the step
         return next_generation                                                  # Return the new (influenced) generation
@@ -196,6 +189,13 @@ class BeliefSpace:
             return self.lower_bound_x
         else:
             return self.upper_bound_x
+
+    def _tend_toward_super_elite(self, x_value):
+        target = self.super_elite.x
+        if x_value > target:
+            return x_value - self.step                                          # Tend DOWNWARD to best score thus far
+        else:
+            return x_value + self.step                                          # Tend UPWARD to best score thus far
 
     @staticmethod
     def _greater_than(value, base_value):
@@ -237,8 +237,10 @@ if __name__ == '__main__':
         time = time + 1
 
     print("Final Values\n")
-    for i in range(20):
-        print(population.current_gen[i])
+    print("Best: ", end="")
+    print(population.current_gen[0])
+    for j in range(1, 20):
+        print(population.current_gen[j])
     print("\nfin\n")
 
 
