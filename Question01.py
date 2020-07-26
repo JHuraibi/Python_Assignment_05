@@ -56,9 +56,8 @@ class PopulationSpace:
         self._initial_population()
 
     def __str__(self):
-        pop_size = len(self.current_gen)
-        for i in range(0, pop_size):
-            print("{} ".format(self.current_gen[i]))
+        for solution in self.current_gen:
+            print("{} ".format(solution.y))
         print("\n")
 
     def _initial_population(self):
@@ -68,8 +67,7 @@ class PopulationSpace:
             self.current_gen[i] = random.randint(-10, 100)
 
     def generate(self, next_gen):
-        """Generates the initial 50 random solutions (i.e. the population).
-        Values range from -10 to 110."""
+        """Sets the current generation equal to the newly-influenced and updated next generation."""
         self.current_gen = next_gen
 
     def evaluate(self):
