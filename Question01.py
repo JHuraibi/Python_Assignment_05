@@ -15,7 +15,7 @@ class PopulationSpace:
         self._initial_population()
 
     def __getitem__(self, item):
-        return population[item]
+        return population.current_gen[item]
 
     def _initial_population(self):
         """Generates the initial 50 random solutions (i.e. the population).
@@ -198,11 +198,14 @@ if __name__ == '__main__':
     population = PopulationSpace()                                              # Initialize Pt (t = 0)
     belief = BeliefSpace()                                                      # Initialize Bt (t = 0)
 
+    history = [None] * endTime
+
     # --| Evolution loop |--
     while time < endTime:
         population.evaluate()                                                   # Evaluate Pt (t = time). AKA obj()
         belief.update(population.accept())                                      # Update Bt using accepted Pt values
         influenced = belief.influence(population.current_gen)                   # Influence next gen. using Bt knowledge
+        history[time] = belief.elites  # HISTORY
         population.generate(influenced)                                         # Generate the next generation
         time = time + 1                                                         # Increment time/generation
     # --| End Evolution loop |--
@@ -217,6 +220,25 @@ if __name__ == '__main__':
 
         print("  [%i]   " % (j + 1), end="")                                    # Line number
         print(population.current_gen[j])                                        # x and y value of individual solution
+
+    print("\n\n\n")
+    gen_counter = 1
+    size = len(history)
+    for i in range(size):
+        print("\n--| Elites of Generation %i |--" % (i + 1))
+        elites = history[i]
+        print("[Best]   ", end="")
+        print(elites[0])
+
+        for k in range(1, 10):
+            if k + 1 < 10:
+                print(" ", end="")
+
+            print("  [%i]   " % (k + 1), end="")
+            print(elites[k])
+
+        gen_counter = gen_counter + 1
+
 
 # --| Overview of Major Methods |--
 #
