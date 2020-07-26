@@ -4,6 +4,7 @@
 
 import math
 import random
+from breezypythongui import EasyFrame
 
 
 class PopulationSpace:
@@ -191,6 +192,41 @@ class Solution:
         return -(math.exp(exponent))                                            # -exp(-(x / 100)^2))
 
 
+class Graphics(EasyFrame):
+    def __init__(self, history):
+        EasyFrame.__init__(self, title="Canvas Demo 1")
+        self.canvas = self.addCanvas(row=0, column=0, columnspan=3, width=1000, height=800)
+        self.canvas["background"] = "white"
+        self.items = list()
+
+        self.history = history
+
+        self.red_value = 0
+        self.blue_value = 255
+        self._draw_all()
+
+    def _draw_all(self):
+        for elites in self.history:
+            self._draw_bounding_box(elites)
+            self._draw_plot_points(elites)
+
+    def _draw_bounding_box(self, elites):
+        elites = sorted(elites, key=lambda solution: solution.x)                # Sort by solution x-values
+        lower_x = elites[0].x
+        upper_x = elites[-1].x
+
+        elites = sorted(elites, key=lambda solution: solution.y)                # Re-sort by solution y-values
+        lower_y = elites[0].y
+        upper_y = elites[-1].y
+
+
+    def _draw_plot_points(self, elites):
+        for solutions in elites:
+            x = solutions.x
+            y = solutions.y
+            self.items.append(self.canvas.drawOval(x - 4, y - 4, x + 4, y + 4, fill="red"))
+
+
 if __name__ == '__main__':
     time = 0                                                                    # t
     endTime = 100                                                               # How many "generations" to run
@@ -238,6 +274,10 @@ if __name__ == '__main__':
             print(elites[k])
 
         gen_counter = gen_counter + 1
+
+    graphics = Graphics(history)
+
+
 
 
 # --| Overview of Major Methods |--
