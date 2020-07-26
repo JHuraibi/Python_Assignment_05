@@ -192,24 +192,6 @@ class BeliefSpace:
         else:
             return x_value + self.step                                          # Tend UPWARD to best score thus far
 
-    @staticmethod
-    def _greater_than(value, base_value):
-        """Returns whether "value" is GREATER than "base_value".
-        Built-in Python Rounding.
-        Floating-point precision of 20."""
-        value = round(value, 20)
-        base_value = round(base_value, 20)
-        return (value - base_value) > 1e-21
-
-    @staticmethod
-    def _less_than(value, base_value):
-        """Returns whether "value" is LESSER than "base_value".
-        Built-in Python Rounding.
-        Floating-point precision of 20."""
-        value = round(value, 20)
-        base_value = round(base_value, 20)
-        return (value - base_value) < -1e-21
-
     def _update_step_amount(self):
         """Fine-tunes the value that Solution x-values will be adjusted by next generation."""
         self.step = self.step / 2.0                                             # Halve the step amount
