@@ -117,7 +117,7 @@ class BeliefSpace:
         self.minima_x = None
         self.maxima_x = None
         self.elites = []
-        self.super_elite = []
+        self.super_elite = None
 
     def update(self, elites):
         """Adds the experiences of the accepted individuals of the Population by:
