@@ -206,13 +206,11 @@ class Graphics(EasyFrame):
     BLUE = 255
     COLOR_STEP = None                                                           # Red and Blue color amount transitions
 
-    box_counter = 0
-
     def __init__(self, history, generation_size):
         EasyFrame.__init__(self, title="Canvas Demo 1")
         self.canvas = self.addCanvas(row=0, column=0, columnspan=3,
                                      width=self.WIDTH + self.FRAME_PAD, height=self.HEIGHT + self.FRAME_PAD)
-        self.canvas["background"] = "white"
+        self.canvas["background"] = "grey"
         self.items = list()
 
         self.history = history
@@ -234,13 +232,11 @@ class Graphics(EasyFrame):
     def _draw_all(self):
         for i in range(1, self.generation_size):
             elites = history[i]
-            self._draw_bounding_box(elites)
-            self._draw_plot_points(elites)
-            self._update_color()
+            # self._draw_bounding_box(elites)
+            self._draw_plot_point(elites)
+
 
     def _draw_bounding_box(self, elites):
-        print("BOX: %i" % self.box_counter)
-        self.box_counter = self.box_counter + 1
         elites = sorted(elites, key=lambda solution: solution.x)                # Sort by solution x-values
         lower_x = elites[0].x
         upper_x = elites[-1].x
@@ -257,16 +253,16 @@ class Graphics(EasyFrame):
         box = self.canvas.drawRectangle(lower_x, lower_y, upper_x, upper_y, outline=self.COLOR, fill=None)
         self.items.append(box)
 
-    def _draw_plot_points(self, elites):
+    def _draw_plot_point(self, elites):
         # color = self._get_color()
         elites = sorted(elites, key=lambda solution: solution.x)  # Sort by solution x-values
-        for elites in self.history:
-            super_elite = elites[0]
-            x = self._adjust_X(super_elite.x)
-            y = self._adjust_Y(super_elite.y)
+        super_elite = elites[0]
+        x = self._adjust_X(super_elite.x)
+        y = self._adjust_Y(super_elite.y)
 
-            plot_point = self.canvas.drawOval(x, y, (x + self.DOT_W), (y + self.DOT_W), fill=self.COLOR)
-            self.items.append(plot_point)
+        plot_point = self.canvas.drawOval(x, y, (x + self.DOT_W), (y + self.DOT_W), fill=self.COLOR)
+        self.items.append(plot_point)
+        self._update_color()
 
     def _update_color(self):
         self.RED = self.RED + self.COLOR_STEP
@@ -286,22 +282,21 @@ class Graphics(EasyFrame):
         # self.COLOR = "#" + str(red_hex) + str(blue_hex) + "00"
         self.COLOR = "#" + str(red_hex) + "00" + str(blue_hex)
 
+    def _reset_color(self):
+        self.RED = 0
+        self.BLUE = 255
+
     def _adjust_X(self, x_value):
         return (x_value * self.X_RATIO) + self.X_OFFSET
 
     def _adjust_Y(self, y_value):
         y_value = (y_value * self.Y_RATIO) + self.Y_OFFSET
-        if y_value < self.HEIGHT:
-            return y_value
-        else:
-            return self.HEIGHT
+        return y_value
+        # if y_value > self.HEIGHT:
+        #     return y_value
+        # else:
+        #     return self.HEIGHT
 
-    def _adjust_Y_log(self, y_value):
-        plot_y = math.log(abs(y_value))
-        if y_value < 0.0:
-            return (-plot_y) + self.Y_OFFSET
-        else:
-            return plot_y + self.Y_OFFSET
 
 if __name__ == '__main__':
     time = 0                                                                    # t
