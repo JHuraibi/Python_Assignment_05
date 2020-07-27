@@ -195,41 +195,52 @@ class Solution:
 class Graphics(EasyFrame):
     HEIGHT = 800                                                                # Window height
     WIDTH = 1000                                                                # Window width
+    FRAME_PAD = 10
     X_OFFSET = WIDTH / 5                                                        # X-axis origin point
-    Y_OFFSET = HEIGHT / 2                                                       # Y-axis origin point
+    Y_OFFSET = HEIGHT / 2                                                     # Y-axis origin point
     X_RATIO = 5.0                                                               # X-axis aspect adjustment
-    Y_RATIO = 100.0                                                             # Y-axis aspect adjustment
-    DOT_W = 10.0                                                                 # Size of plot points (in pixels)
+    Y_RATIO = 400.0                                                             # Y-axis aspect adjustment
+    DOT_W = 10.0                                                                # Size of plot points (in pixels)
+    COLOR = "#00ff00"                                                           # Start color, all blue
     RED = 0
     BLUE = 255
     COLOR_STEP = None                                                           # Red and Blue color amount transitions
 
-    def __init__(self, history):
+    box_counter = 0
+
+    def __init__(self, history, generation_size):
         EasyFrame.__init__(self, title="Canvas Demo 1")
-        self.canvas = self.addCanvas(row=0, column=0, columnspan=3, width=self.WIDTH, height=self.HEIGHT)
+        self.canvas = self.addCanvas(row=0, column=0, columnspan=3,
+                                     width=self.WIDTH + self.FRAME_PAD, height=self.HEIGHT + self.FRAME_PAD)
         self.canvas["background"] = "white"
         self.items = list()
 
         self.history = history
+        self.generation_size = generation_size
         # self.record_best_solution(history[0])
-        self.COLOR_STEP = 255 / round(len(history))
-        self.red_value = 0
-        self.blue_value = 255
-        self._draw_axes()
+        self.COLOR_STEP = math.floor(255 / generation_size)
         self._draw_all()
+        self._draw_axes()
 
     def _draw_axes(self):
-        center_y = self.HEIGHT / 2
-        center_x = self.X_OFFSET
-        self.items.append(self.canvas.drawLine(0, center_y, self.WIDTH, center_y, fill="black"))
-        self.items.append(self.canvas.drawLine(center_x, 0, center_x, self.HEIGHT, fill="black"))
+        vertical_center = (self.HEIGHT / 2) + (self.Y_OFFSET / 2)
+        horizontal_center = (self.WIDTH / 2) - self.X_OFFSET
+
+        x_axis = self.canvas.drawLine(0, vertical_center, self.WIDTH, vertical_center, fill="black")
+        y_axis = self.canvas.drawLine(horizontal_center, 0, horizontal_center, self.HEIGHT, fill="black")
+        self.items.append(x_axis)
+        self.items.append(y_axis)
 
     def _draw_all(self):
-        for elites in self.history:
+        for i in range(1, self.generation_size):
+            elites = history[i]
             self._draw_bounding_box(elites)
             self._draw_plot_points(elites)
+            self._update_color()
 
     def _draw_bounding_box(self, elites):
+        print("BOX: %i" % self.box_counter)
+        self.box_counter = self.box_counter + 1
         elites = sorted(elites, key=lambda solution: solution.x)                # Sort by solution x-values
         lower_x = elites[0].x
         upper_x = elites[-1].x
@@ -237,7 +248,14 @@ class Graphics(EasyFrame):
         elites = sorted(elites, key=lambda solution: solution.y)                # Re-sort by solution y-values
         lower_y = elites[0].y
         upper_y = elites[-1].y
-        # self.items.append(self.canvas)
+
+        lower_x = self._adjust_X(lower_x)                                       # Apply transforms
+        upper_x = self._adjust_X(upper_x)
+        lower_y = self._adjust_Y(lower_y)
+        upper_y = self._adjust_Y(upper_y)
+
+        box = self.canvas.drawRectangle(lower_x, lower_y, upper_x, upper_y, outline=self.COLOR, fill=None)
+        self.items.append(box)
 
     def _draw_plot_points(self, elites):
         # color = self._get_color()
@@ -247,14 +265,36 @@ class Graphics(EasyFrame):
             x = self._adjust_X(super_elite.x)
             y = self._adjust_Y(super_elite.y)
 
-            plot_point = self.canvas.drawOval(x, y, (x + self.DOT_W), (y + self.DOT_W), fill="red")
+            plot_point = self.canvas.drawOval(x, y, (x + self.DOT_W), (y + self.DOT_W), fill=self.COLOR)
             self.items.append(plot_point)
+
+    def _update_color(self):
+        self.RED = self.RED + self.COLOR_STEP
+        self.BLUE = self.BLUE - self.COLOR_STEP
+
+        self.RED = round(self.RED)
+        self.BLUE = round(self.BLUE)
+
+        red_hex = hex(self.RED)[2:]
+        blue_hex = hex(self.BLUE)[2:]
+
+        if len(red_hex) == 1:
+            red_hex = "0" + red_hex
+        if len(blue_hex) == 1:
+            blue_hex = "0" + blue_hex
+
+        # self.COLOR = "#" + str(red_hex) + str(blue_hex) + "00"
+        self.COLOR = "#" + str(red_hex) + "00" + str(blue_hex)
 
     def _adjust_X(self, x_value):
         return (x_value * self.X_RATIO) + self.X_OFFSET
 
     def _adjust_Y(self, y_value):
-        return (y_value * self.Y_RATIO) + self.Y_OFFSET
+        y_value = (y_value * self.Y_RATIO) + self.Y_OFFSET
+        if y_value < self.HEIGHT:
+            return y_value
+        else:
+            return self.HEIGHT
 
     def _adjust_Y_log(self, y_value):
         plot_y = math.log(abs(y_value))
@@ -293,25 +333,7 @@ if __name__ == '__main__':
         print("  [%i]   " % (j + 1), end="")                                    # Line number
         print(population.current_gen[j])                                        # x and y value of individual solution
 
-    print("\n\n\n")
-    gen_counter = 1
-    size = len(history)
-    for i in range(size):
-        print("\n--| Elites of Generation %i |--" % (i + 1))
-        elites = history[i]
-        print("[Best]   ", end="")
-        print(elites[0])
-
-        for k in range(1, 10):
-            if k + 1 < 10:
-                print(" ", end="")
-
-            print("  [%i]   " % (k + 1), end="")
-            print(elites[k])
-
-        gen_counter = gen_counter + 1
-
-    graphics = Graphics(history)
+    graphics = Graphics(history, endTime)
     graphics.mainloop()
 
 
