@@ -193,17 +193,36 @@ class Solution:
 
 
 class Graphics(EasyFrame):
+    HEIGHT = 800                                                                # Window height
+    WIDTH = 1000                                                                # Window width
+    X_OFFSET = WIDTH / 5                                                        # X-axis origin point
+    Y_OFFSET = HEIGHT / 2                                                       # Y-axis origin point
+    X_RATIO = 5.0                                                               # X-axis aspect adjustment
+    Y_RATIO = 100.0                                                             # Y-axis aspect adjustment
+    DOT_W = 10.0                                                                 # Size of plot points (in pixels)
+    RED = 0
+    BLUE = 255
+    COLOR_STEP = None                                                           # Red and Blue color amount transitions
+
     def __init__(self, history):
         EasyFrame.__init__(self, title="Canvas Demo 1")
-        self.canvas = self.addCanvas(row=0, column=0, columnspan=3, width=1000, height=800)
+        self.canvas = self.addCanvas(row=0, column=0, columnspan=3, width=self.WIDTH, height=self.HEIGHT)
         self.canvas["background"] = "white"
         self.items = list()
 
         self.history = history
-
+        # self.record_best_solution(history[0])
+        self.COLOR_STEP = 255 / round(len(history))
         self.red_value = 0
         self.blue_value = 255
+        self._draw_axes()
         self._draw_all()
+
+    def _draw_axes(self):
+        center_y = self.HEIGHT / 2
+        center_x = self.X_OFFSET
+        self.items.append(self.canvas.drawLine(0, center_y, self.WIDTH, center_y, fill="black"))
+        self.items.append(self.canvas.drawLine(center_x, 0, center_x, self.HEIGHT, fill="black"))
 
     def _draw_all(self):
         for elites in self.history:
@@ -218,14 +237,31 @@ class Graphics(EasyFrame):
         elites = sorted(elites, key=lambda solution: solution.y)                # Re-sort by solution y-values
         lower_y = elites[0].y
         upper_y = elites[-1].y
-
+        # self.items.append(self.canvas)
 
     def _draw_plot_points(self, elites):
-        for solutions in elites:
-            x = solutions.x
-            y = solutions.y
-            self.items.append(self.canvas.drawOval(x - 4, y - 4, x + 4, y + 4, fill="red"))
+        # color = self._get_color()
+        elites = sorted(elites, key=lambda solution: solution.x)  # Sort by solution x-values
+        for elites in self.history:
+            super_elite = elites[0]
+            x = self._adjust_X(super_elite.x)
+            y = self._adjust_Y(super_elite.y)
 
+            plot_point = self.canvas.drawOval(x, y, (x + self.DOT_W), (y + self.DOT_W), fill="red")
+            self.items.append(plot_point)
+
+    def _adjust_X(self, x_value):
+        return (x_value * self.X_RATIO) + self.X_OFFSET
+
+    def _adjust_Y(self, y_value):
+        return (y_value * self.Y_RATIO) + self.Y_OFFSET
+
+    def _adjust_Y_log(self, y_value):
+        plot_y = math.log(abs(y_value))
+        if y_value < 0.0:
+            return (-plot_y) + self.Y_OFFSET
+        else:
+            return plot_y + self.Y_OFFSET
 
 if __name__ == '__main__':
     time = 0                                                                    # t
@@ -276,6 +312,7 @@ if __name__ == '__main__':
         gen_counter = gen_counter + 1
 
     graphics = Graphics(history)
+    graphics.mainloop()
 
 
 
